@@ -1,37 +1,32 @@
-'use client';
+"use client";
 
-import { useState, useEffect } from 'react';
-import { useRouter } from 'next/navigation';
-import { supabase } from '@/lib/supabase';
-import { Button } from '@/components/ui/button';
-import { Input } from '@/components/ui/input';
-import { Label } from '@/components/ui/label';
-import Header from '@/components/Header';
-import AdminSubmissions from '@/components/AdminSubmissions';
-import { User } from '@supabase/supabase-js';
-
-interface AdminUser extends User {
-  user_metadata?: {
-    role?: string;
-  };
-}
+import { useState, useEffect } from "react";
+import { useRouter } from "next/navigation";
+import { supabase } from "@/lib/supabase";
+import { Button } from "@/components/ui/button";
+import { Input } from "@/components/ui/input";
+import { Label } from "@/components/ui/label";
+import Header from "@/components/Header";
+import AdminSubmissions from "@/components/AdminSubmissions";
+import { User } from "@supabase/supabase-js";
 
 export default function AdminPanel() {
-  const [user, setUser] = useState<AdminUser | null>(null);
+  const [user, setUser] = useState<User | null>(null);
   const [isLoading, setIsLoading] = useState(true);
   const [isAuthenticating, setIsAuthenticating] = useState(false);
-  const [email, setEmail] = useState('');
-  const [password, setPassword] = useState('');
-  const [authError, setAuthError] = useState('');
-  const [passwordStrength, setPasswordStrength] = useState('');
-  const [showPasswordRequirements, setShowPasswordRequirements] = useState(false);
+  const [email, setEmail] = useState("");
+  const [password, setPassword] = useState("");
+  const [authError, setAuthError] = useState("");
+  const [passwordStrength, setPasswordStrength] = useState("");
+  const [showPasswordRequirements, setShowPasswordRequirements] =
+    useState(false);
   const [passwordRequirements, setPasswordRequirements] = useState({
     length: false,
     uppercase: false,
     lowercase: false,
     numbers: false,
     special: false,
-    noCommon: false
+    noCommon: false,
   });
   const router = useRouter();
 
@@ -48,9 +43,9 @@ export default function AdminPanel() {
       lowercase: /[a-z]/.test(pwd),
       numbers: /\d/.test(pwd),
       special: /[!@#$%^&*()_+\-=\[\]{};':"\\|,.<>\/?]/.test(pwd),
-      noCommon: !['password', '123456', 'admin', 'imxauto'].some(common =>
+      noCommon: !["password", "123456", "admin", "imxauto"].some((common) =>
         pwd.toLowerCase().includes(common)
-      )
+      ),
     };
 
     return requirements;
@@ -61,11 +56,11 @@ export default function AdminPanel() {
     const score = Object.values(requirements).filter(Boolean).length;
 
     if (score < 4) {
-      setPasswordStrength('weak');
+      setPasswordStrength("weak");
     } else if (score < 6) {
-      setPasswordStrength('medium');
+      setPasswordStrength("medium");
     } else {
-      setPasswordStrength('strong');
+      setPasswordStrength("strong");
     }
   };
 
@@ -78,14 +73,14 @@ export default function AdminPanel() {
       setShowPasswordRequirements(true);
     } else {
       setShowPasswordRequirements(false);
-      setPasswordStrength('');
+      setPasswordStrength("");
       setPasswordRequirements({
         length: false,
         uppercase: false,
         lowercase: false,
         numbers: false,
         special: false,
-        noCommon: false
+        noCommon: false,
       });
     }
   };
@@ -93,41 +88,44 @@ export default function AdminPanel() {
   const handleSignIn = async (e: React.FormEvent) => {
     e.preventDefault();
     setIsAuthenticating(true);
-    setAuthError('');
+    setAuthError("");
 
     try {
       // Check if email is from IMX Auto Group domain
-      if (!email.endsWith('@imxautogroup.com')) {
-        setAuthError('Access denied. Only @imxautogroup.com emails are allowed.');
+      if (!email.endsWith("@imxautogroup.com")) {
+        setAuthError(
+          "Access denied. Only @imxautogroup.com emails are allowed."
+        );
         setIsAuthenticating(false);
         return;
       }
 
       // Simple password check - you can customize this
-      const correctPassword = 'IMXAdmin2024!'; // Change this to your desired password
+      const correctPassword = "IMXAdmin2024!"; // Change this to your desired password
 
       if (password !== correctPassword) {
-        setAuthError('Invalid password.');
+        setAuthError("Invalid password.");
         setIsAuthenticating(false);
         return;
       }
 
       // Create a mock user object for successful authentication
       const mockUser = {
-        id: 'admin-user',
+        id: "admin-user",
         email: email.trim(),
-        user_metadata: { role: 'admin' },
+        user_metadata: { role: "admin" },
+        app_metadata: {},
+        aud: "authenticated",
         created_at: new Date().toISOString(),
-        updated_at: new Date().toISOString()
+        updated_at: new Date().toISOString(),
       };
 
-      setUser(mockUser as AdminUser);
-      setAuthError('');
-      console.log('Admin signed in:', email);
-
+      setUser(mockUser as User);
+      setAuthError("");
+      console.log("Admin signed in:", email);
     } catch (error) {
-      console.error('Sign in error:', error);
-      setAuthError('An unexpected error occurred.');
+      console.error("Sign in error:", error);
+      setAuthError("An unexpected error occurred.");
     } finally {
       setIsAuthenticating(false);
     }
@@ -136,12 +134,12 @@ export default function AdminPanel() {
   const handleSignOut = async () => {
     try {
       setUser(null);
-      setEmail('');
-      setPassword('');
-      setAuthError('');
-      console.log('Admin signed out');
+      setEmail("");
+      setPassword("");
+      setAuthError("");
+      console.log("Admin signed out");
     } catch (error) {
-      console.error('Sign out error:', error);
+      console.error("Sign out error:", error);
     }
   };
 
@@ -212,39 +210,94 @@ export default function AdminPanel() {
                 {showPasswordRequirements && (
                   <div className="mt-2">
                     <div className="flex items-center space-x-2 mb-2">
-                      <span className="text-xs text-imx-gray-600">Password Strength:</span>
-                      <span className={`text-xs font-medium ${passwordStrength === 'weak' ? 'text-red-600' :
-                          passwordStrength === 'medium' ? 'text-yellow-600' :
-                            'text-green-600'
-                        }`}>
+                      <span className="text-xs text-imx-gray-600">
+                        Password Strength:
+                      </span>
+                      <span
+                        className={`text-xs font-medium ${
+                          passwordStrength === "weak"
+                            ? "text-red-600"
+                            : passwordStrength === "medium"
+                            ? "text-yellow-600"
+                            : "text-green-600"
+                        }`}
+                      >
                         {passwordStrength.toUpperCase()}
                       </span>
                     </div>
 
                     {/* Password Requirements */}
                     <div className="text-xs space-y-1">
-                      <div className={`flex items-center ${passwordRequirements.length ? 'text-green-600' : 'text-red-600'}`}>
-                        <span className="mr-1">{passwordRequirements.length ? '✓' : '✗'}</span>
+                      <div
+                        className={`flex items-center ${
+                          passwordRequirements.length
+                            ? "text-green-600"
+                            : "text-red-600"
+                        }`}
+                      >
+                        <span className="mr-1">
+                          {passwordRequirements.length ? "✓" : "✗"}
+                        </span>
                         At least 12 characters
                       </div>
-                      <div className={`flex items-center ${passwordRequirements.uppercase ? 'text-green-600' : 'text-red-600'}`}>
-                        <span className="mr-1">{passwordRequirements.uppercase ? '✓' : '✗'}</span>
+                      <div
+                        className={`flex items-center ${
+                          passwordRequirements.uppercase
+                            ? "text-green-600"
+                            : "text-red-600"
+                        }`}
+                      >
+                        <span className="mr-1">
+                          {passwordRequirements.uppercase ? "✓" : "✗"}
+                        </span>
                         One uppercase letter
                       </div>
-                      <div className={`flex items-center ${passwordRequirements.lowercase ? 'text-green-600' : 'text-red-600'}`}>
-                        <span className="mr-1">{passwordRequirements.lowercase ? '✓' : '✗'}</span>
+                      <div
+                        className={`flex items-center ${
+                          passwordRequirements.lowercase
+                            ? "text-green-600"
+                            : "text-red-600"
+                        }`}
+                      >
+                        <span className="mr-1">
+                          {passwordRequirements.lowercase ? "✓" : "✗"}
+                        </span>
                         One lowercase letter
                       </div>
-                      <div className={`flex items-center ${passwordRequirements.numbers ? 'text-green-600' : 'text-red-600'}`}>
-                        <span className="mr-1">{passwordRequirements.numbers ? '✓' : '✗'}</span>
+                      <div
+                        className={`flex items-center ${
+                          passwordRequirements.numbers
+                            ? "text-green-600"
+                            : "text-red-600"
+                        }`}
+                      >
+                        <span className="mr-1">
+                          {passwordRequirements.numbers ? "✓" : "✗"}
+                        </span>
                         One number
                       </div>
-                      <div className={`flex items-center ${passwordRequirements.special ? 'text-green-600' : 'text-red-600'}`}>
-                        <span className="mr-1">{passwordRequirements.special ? '✓' : '✗'}</span>
+                      <div
+                        className={`flex items-center ${
+                          passwordRequirements.special
+                            ? "text-green-600"
+                            : "text-red-600"
+                        }`}
+                      >
+                        <span className="mr-1">
+                          {passwordRequirements.special ? "✓" : "✗"}
+                        </span>
                         One special character
                       </div>
-                      <div className={`flex items-center ${passwordRequirements.noCommon ? 'text-green-600' : 'text-red-600'}`}>
-                        <span className="mr-1">{passwordRequirements.noCommon ? '✓' : '✗'}</span>
+                      <div
+                        className={`flex items-center ${
+                          passwordRequirements.noCommon
+                            ? "text-green-600"
+                            : "text-red-600"
+                        }`}
+                      >
+                        <span className="mr-1">
+                          {passwordRequirements.noCommon ? "✓" : "✗"}
+                        </span>
                         No common words
                       </div>
                     </div>
@@ -263,12 +316,10 @@ export default function AdminPanel() {
                     Signing In...
                   </div>
                 ) : (
-                  'Sign In'
+                  "Sign In"
                 )}
               </Button>
             </form>
-
-
           </div>
         </div>
       </div>
@@ -288,9 +339,7 @@ export default function AdminPanel() {
                 <h1 className="text-2xl font-bold text-imx-black mb-2">
                   IMX Auto Group - Admin Panel
                 </h1>
-                <p className="text-imx-gray-600">
-                  Welcome back, {user.email}
-                </p>
+                <p className="text-imx-gray-600">Welcome back, {user.email}</p>
               </div>
               <div className="flex items-center space-x-4">
                 <div className="text-right">
