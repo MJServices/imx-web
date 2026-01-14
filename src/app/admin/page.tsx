@@ -48,7 +48,7 @@ export default function AdminPanel() {
       lowercase: /[a-z]/.test(pwd),
       numbers: /\d/.test(pwd),
       special: /[!@#$%^&*()_+\-=\[\]{};':"\\|,.<>\/?]/.test(pwd),
-      noCommon: !['password', '123456', 'admin', 'imxauto'].some(common => 
+      noCommon: !['password', '123456', 'admin', 'imxauto'].some(common =>
         pwd.toLowerCase().includes(common)
       )
     };
@@ -59,7 +59,7 @@ export default function AdminPanel() {
   const updatePasswordStrength = (pwd: string) => {
     const requirements = validatePassword(pwd);
     const score = Object.values(requirements).filter(Boolean).length;
-    
+
     if (score < 4) {
       setPasswordStrength('weak');
     } else if (score < 6) {
@@ -105,7 +105,7 @@ export default function AdminPanel() {
 
       // Simple password check - you can customize this
       const correctPassword = 'IMXAdmin2024!'; // Change this to your desired password
-      
+
       if (password !== correctPassword) {
         setAuthError('Invalid password.');
         setIsAuthenticating(false);
@@ -124,7 +124,7 @@ export default function AdminPanel() {
       setUser(mockUser as AdminUser);
       setAuthError('');
       console.log('Admin signed in:', email);
-      
+
     } catch (error) {
       console.error('Sign in error:', error);
       setAuthError('An unexpected error occurred.');
@@ -207,21 +207,20 @@ export default function AdminPanel() {
                   required
                   disabled={isAuthenticating}
                 />
-                
+
                 {/* Password Strength Indicator */}
                 {showPasswordRequirements && (
                   <div className="mt-2">
                     <div className="flex items-center space-x-2 mb-2">
                       <span className="text-xs text-imx-gray-600">Password Strength:</span>
-                      <span className={`text-xs font-medium ${
-                        passwordStrength === 'weak' ? 'text-red-600' :
-                        passwordStrength === 'medium' ? 'text-yellow-600' :
-                        'text-green-600'
-                      }`}>
+                      <span className={`text-xs font-medium ${passwordStrength === 'weak' ? 'text-red-600' :
+                          passwordStrength === 'medium' ? 'text-yellow-600' :
+                            'text-green-600'
+                        }`}>
                         {passwordStrength.toUpperCase()}
                       </span>
                     </div>
-                    
+
                     {/* Password Requirements */}
                     <div className="text-xs space-y-1">
                       <div className={`flex items-center ${passwordRequirements.length ? 'text-green-600' : 'text-red-600'}`}>
@@ -269,14 +268,7 @@ export default function AdminPanel() {
               </Button>
             </form>
 
-            <div className="mt-6 p-4 bg-blue-50 border border-blue-200 rounded-md">
-              <h3 className="font-semibold text-blue-900 mb-2">Admin Access Requirements</h3>
-              <ul className="text-sm text-blue-800 space-y-1">
-                <li>• Must use @imxautogroup.com email address</li>
-                <li>• Enter the correct admin password</li>
-                <li>• Password: <code className="bg-blue-100 px-1 rounded">IMXAdmin2024!</code></li>
-              </ul>
-            </div>
+
           </div>
         </div>
       </div>

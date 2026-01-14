@@ -17,6 +17,8 @@ interface Submission {
   model: string;
   ownership: string;
   status: string;
+  current_mileage?: string;
+  comments?: string;
   created_at: string;
   updated_at: string;
 }
@@ -76,7 +78,7 @@ export default function SubmissionDetailView({ submission, onBack }: SubmissionD
           const { data: urlData } = supabase.storage
             .from('intake-photos')
             .getPublicUrl(photo.file_path);
-          
+
           return {
             ...photo,
             url: urlData.publicUrl
@@ -132,7 +134,9 @@ export default function SubmissionDetailView({ submission, onBack }: SubmissionD
           year: submission.vehicle_year,
           make: submission.make,
           model: submission.model,
-          ownership: submission.ownership
+          ownership: submission.ownership,
+          mileage: submission.current_mileage,
+          comments: submission.comments
         },
         status: submission.status,
         dates: {
@@ -273,6 +277,12 @@ export default function SubmissionDetailView({ submission, onBack }: SubmissionD
                 <p className="text-imx-black">{submission.ownership}</p>
               </div>
             </div>
+            {submission.current_mileage && (
+              <div>
+                <label className="text-sm font-medium text-imx-gray-600">Current Mileage</label>
+                <p className="text-imx-black font-semibold">{submission.current_mileage}</p>
+              </div>
+            )}
             <div className="p-4 bg-imx-gray-50 rounded-lg">
               <p className="text-lg font-medium text-imx-black">
                 {submission.vehicle_year} {submission.make} {submission.model}
@@ -282,6 +292,23 @@ export default function SubmissionDetailView({ submission, onBack }: SubmissionD
           </CardContent>
         </Card>
       </div>
+
+      {/* Comments */}
+      {submission.comments && (
+        <Card>
+          <CardHeader>
+            <CardTitle className="flex items-center">
+              <FileText className="w-5 h-5 mr-2 text-imx-red" />
+              Additional Comments
+            </CardTitle>
+          </CardHeader>
+          <CardContent>
+            <div className="p-4 bg-imx-gray-50 rounded-lg">
+              <p className="text-imx-black whitespace-pre-wrap">{submission.comments}</p>
+            </div>
+          </CardContent>
+        </Card>
+      )}
 
       {/* Questionnaire Answers */}
       {questionnaireAnswers.length > 0 && (

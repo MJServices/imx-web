@@ -23,6 +23,8 @@ interface Submission {
   updated_at: string;
   photos_count: number;
   questionnaire_completed: boolean;
+  current_mileage?: string;
+  comments?: string;
 }
 
 export default function AdminSubmissions() {
@@ -31,7 +33,7 @@ export default function AdminSubmissions() {
   const [isLoading, setIsLoading] = useState(true);
   const [selectedSubmission, setSelectedSubmission] = useState<Submission | null>(null);
   const [showFilters, setShowFilters] = useState(false);
-  
+
   // Filter states
   const [searchTerm, setSearchTerm] = useState('');
   const [statusFilter, setStatusFilter] = useState('all');
@@ -89,7 +91,9 @@ export default function AdminSubmissions() {
         ...submission,
         photos_count: photoCounts[submission.submission_id] || 0,
         questionnaire_completed: questionnaireCompleted.has(submission.submission_id),
-        status: submission.status || 'in_progress'
+        status: submission.status || 'in_progress',
+        current_mileage: submission.current_mileage,
+        comments: submission.comments
       }));
 
       setSubmissions(enrichedSubmissions);
@@ -126,7 +130,7 @@ export default function AdminSubmissions() {
     if (dateFilter !== 'all') {
       const now = new Date();
       const filterDate = new Date();
-      
+
       switch (dateFilter) {
         case 'today':
           filterDate.setHours(0, 0, 0, 0);
@@ -138,9 +142,9 @@ export default function AdminSubmissions() {
           filterDate.setMonth(now.getMonth() - 1);
           break;
       }
-      
+
       if (dateFilter !== 'all') {
-        filtered = filtered.filter(submission => 
+        filtered = filtered.filter(submission =>
           new Date(submission.created_at) >= filterDate
         );
       }
@@ -211,9 +215,9 @@ export default function AdminSubmissions() {
 
   if (selectedSubmission) {
     return (
-      <SubmissionDetailView 
-        submission={selectedSubmission} 
-        onBack={() => setSelectedSubmission(null)} 
+      <SubmissionDetailView
+        submission={selectedSubmission}
+        onBack={() => setSelectedSubmission(null)}
       />
     );
   }

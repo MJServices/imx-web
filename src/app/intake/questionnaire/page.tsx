@@ -7,6 +7,8 @@ import { supabase } from '@/lib/supabase';
 import { Button } from '@/components/ui/button';
 import { RadioGroup, RadioGroupItem } from '@/components/ui/radio-group';
 import { Label } from '@/components/ui/label';
+import { Input } from '@/components/ui/input';
+import { Textarea } from '@/components/ui/textarea';
 import Header from '@/components/Header';
 
 interface Question {
@@ -15,129 +17,125 @@ interface Question {
   options: string[];
 }
 
-interface QuestionnaireAnswer {
-  question_id: string;
-  selected_answer: string;
-}
-
 const vehicleQuestions: Question[] = [
   {
     id: 'q1',
-    question: 'What is your primary reason for purchasing this vehicle?',
-    options: ['Daily commuting', 'Family transportation', 'Business use', 'Recreation/leisure', 'Investment']
+    question: 'Does the vehicle have any accidents?',
+    options: ['Yes', 'No']
   },
   {
     id: 'q2',
-    question: 'How often do you plan to drive this vehicle?',
-    options: ['Daily', '3-4 times per week', '1-2 times per week', 'Occasionally', 'Rarely']
+    question: 'Does the vehicle have any frame damage?',
+    options: ['Yes', 'No']
   },
   {
     id: 'q3',
-    question: 'What is your typical driving distance per day?',
-    options: ['Less than 10 miles', '10-25 miles', '25-50 miles', '50-100 miles', 'More than 100 miles']
+    question: 'Does the vehicle have any flood damage?',
+    options: ['Yes', 'No']
   },
   {
     id: 'q4',
-    question: 'Do you have experience with this vehicle make/model?',
-    options: ['Yes, I\'ve owned this exact model', 'Yes, I\'ve owned this make', 'Some experience with similar vehicles', 'No previous experience', 'First-time car buyer']
+    question: 'Has this vehicle been smoked in?',
+    options: ['Yes', 'No']
   },
   {
     id: 'q5',
-    question: 'What is your preferred fuel type?',
-    options: ['Gasoline', 'Hybrid', 'Electric', 'Diesel', 'No preference']
+    question: 'Are there any mechanical issues OR warning lights displayed on the instrument panel?',
+    options: ['Yes', 'No']
   },
   {
     id: 'q6',
-    question: 'How important is fuel efficiency to you?',
-    options: ['Extremely important', 'Very important', 'Moderately important', 'Slightly important', 'Not important']
+    question: 'Has the odometer ever been altered or replaced?',
+    options: ['Yes', 'No']
   },
   {
     id: 'q7',
-    question: 'What is your budget range for monthly payments?',
-    options: ['Under $200', '$200-$400', '$400-$600', '$600-$800', 'Over $800']
+    question: 'Are there any panels in need of paint or body work?',
+    options: ['None', 'Yes, 1', 'Yes, 2', 'Yes, 3+']
   },
   {
     id: 'q8',
-    question: 'Do you plan to trade in a current vehicle?',
-    options: ['Yes, I have a trade-in', 'No trade-in', 'Considering it', 'Will sell privately', 'Undecided']
+    question: 'Any major rust OR hail damage?',
+    options: ['Yes', 'No']
   },
   {
     id: 'q9',
-    question: 'What is most important to you in a vehicle?',
-    options: ['Reliability', 'Safety features', 'Performance', 'Comfort', 'Technology features']
+    question: 'Any interior items broken or not operable?',
+    options: ['No', 'Yes, 1', 'Yes, 2', 'Yes, 3+']
   },
   {
     id: 'q10',
-    question: 'How long do you typically keep a vehicle?',
-    options: ['1-2 years', '3-5 years', '6-8 years', '9-12 years', 'Until it stops working']
+    question: 'Are there any rips, stains, or tears in the interior?',
+    options: ['No', 'Yes, 1', 'Yes, 2', 'Yes, 3+']
   },
   {
     id: 'q11',
-    question: 'Do you prefer new or used vehicles?',
-    options: ['Always new', 'Prefer new', 'No preference', 'Prefer used', 'Always used']
+    question: 'Do any tires need replacement?',
+    options: ['No', 'Yes, 1 or 2', 'Yes, 3 or 4']
   },
   {
     id: 'q12',
-    question: 'What type of warranty coverage do you prefer?',
-    options: ['Extended warranty', 'Standard manufacturer warranty', 'Third-party warranty', 'No warranty needed', 'Unsure']
-  },
-  {
-    id: 'q13',
-    question: 'How do you typically maintain your vehicles?',
-    options: ['Dealership service', 'Independent mechanic', 'Do it myself', 'Mix of options', 'Minimal maintenance']
-  },
-  {
-    id: 'q14',
-    question: 'What influenced your decision to choose this specific vehicle?',
-    options: ['Online research', 'Friend/family recommendation', 'Previous experience', 'Dealer recommendation', 'Advertisement']
-  },
-  {
-    id: 'q15',
-    question: 'When do you need to complete this purchase?',
-    options: ['Immediately', 'Within 1 week', 'Within 1 month', 'Within 3 months', 'No rush']
+    question: 'Are any aftermarket modifications to this vehicle?',
+    options: ['No', 'Yes']
   }
 ];
 
 export default function VehicleQuestionnaire() {
   const [answers, setAnswers] = useState<Record<string, string>>({});
+  const [currentMileage, setCurrentMileage] = useState('');
+  const [comments, setComments] = useState('');
   const [isLoading, setIsLoading] = useState(true);
   const [isSaving, setIsSaving] = useState(false);
   const router = useRouter();
   const { submissionId } = useSubmissionId();
 
-  // Load existing answers on page load
+  // Load existing answers and form data on page load
   useEffect(() => {
-    const loadExistingAnswers = async () => {
+    const loadData = async () => {
       if (!submissionId) return;
-      
+
       setIsLoading(true);
       try {
-        const { data, error } = await supabase
+        // Load Questionnaire Answers
+        const { data: qData, error: qError } = await supabase
           .from('vehicle_questionnaire')
           .select('question_id, selected_answer')
           .eq('submission_id', submissionId);
 
-        if (data && !error) {
+        if (qData && !qError) {
           const existingAnswers: Record<string, string> = {};
-          data.forEach(item => {
+          qData.forEach(item => {
             existingAnswers[item.question_id] = item.selected_answer;
           });
           setAnswers(existingAnswers);
         }
+
+        // Load Intake Form Data (Mileage & Comments)
+        const { data: fData, error: fError } = await supabase
+          .from('intake_forms')
+          .select('current_mileage, comments')
+          .eq('submission_id', submissionId)
+          .single();
+
+        if (fData && !fError) {
+          setCurrentMileage(fData.current_mileage || '');
+          setComments(fData.comments || '');
+        }
+
       } catch (error) {
-        console.error('Error loading existing answers:', error);
+        console.error('Error loading data:', error);
       } finally {
         setIsLoading(false);
       }
     };
 
-    loadExistingAnswers();
+    loadData();
   }, [submissionId]);
 
   // Save answer to Supabase instantly on change
   const saveAnswer = async (questionId: string, answer: string, questionText: string) => {
     if (!submissionId) return;
-    
+
     setIsSaving(true);
     try {
       const { error } = await supabase
@@ -152,11 +150,33 @@ export default function VehicleQuestionnaire() {
           onConflict: 'submission_id,question_id'
         });
 
-      if (error) {
-        console.error('Error saving answer:', error);
-      }
+      if (error) console.error('Error saving answer:', error);
     } catch (error) {
       console.error('Error saving answer:', error);
+    } finally {
+      setIsSaving(false);
+    }
+  };
+
+  // Save mileage or comments to Supabase
+  const saveIntakeData = async (field: 'current_mileage' | 'comments', value: string) => {
+    if (!submissionId) return;
+
+    setIsSaving(true);
+    try {
+      const { error } = await supabase
+        .from('intake_forms')
+        .upsert({
+          submission_id: submissionId,
+          [field]: value,
+          updated_at: new Date().toISOString()
+        }, {
+          onConflict: 'submission_id'
+        });
+
+      if (error) console.error(`Error saving ${field}:`, error);
+    } catch (error) {
+      console.error(`Error saving ${field}:`, error);
     } finally {
       setIsSaving(false);
     }
@@ -169,16 +189,31 @@ export default function VehicleQuestionnaire() {
       [questionId]: answer
     }));
 
-    // Find the question text
     const question = vehicleQuestions.find(q => q.id === questionId);
     if (question) {
       saveAnswer(questionId, answer, question.question);
     }
   };
 
-  // Check if all questions are answered
+  // Handle mileage change
+  const handleMileageChange = (e: React.ChangeEvent<HTMLInputElement>) => {
+    const value = e.target.value;
+    setCurrentMileage(value);
+    saveIntakeData('current_mileage', value);
+  };
+
+  // Handle comments change
+  const handleCommentsChange = (e: React.ChangeEvent<HTMLTextAreaElement>) => {
+    const value = e.target.value;
+    setComments(value);
+    saveIntakeData('comments', value);
+  };
+
+  // Check if all questions are answered and mileage is entered
   const isComplete = () => {
-    return vehicleQuestions.every(q => answers[q.id]);
+    const questionsAnswered = vehicleQuestions.every(q => answers[q.id]);
+    const mileageEntered = currentMileage.trim().length > 0;
+    return questionsAnswered && mileageEntered;
   };
 
   const handleNext = () => {
@@ -221,7 +256,7 @@ export default function VehicleQuestionnaire() {
               </div>
             </div>
             <div className="w-full bg-imx-gray-200 rounded-full h-2">
-              <div 
+              <div
                 className="bg-imx-red h-2 rounded-full transition-all duration-300"
                 style={{ width: '66.67%' }}
               ></div>
@@ -235,6 +270,21 @@ export default function VehicleQuestionnaire() {
             Please answer the following questions to help us better understand your vehicle needs.
           </p>
 
+          {/* Current Mileage Field */}
+          <div className="mb-8 p-6 bg-imx-gray-50 rounded-lg border border-imx-gray-200">
+            <Label htmlFor="mileage" className="text-lg font-semibold text-imx-black block mb-4">
+              Current Mileage
+            </Label>
+            <Input
+              id="mileage"
+              type="text"
+              placeholder="e.g. 45,000"
+              value={currentMileage}
+              onChange={handleMileageChange}
+              className="max-w-md"
+            />
+          </div>
+
           {/* Progress Counter */}
           <div className="mb-6 p-4 bg-imx-gray-50 rounded-lg border border-imx-gray-200">
             <div className="flex items-center justify-between">
@@ -242,7 +292,7 @@ export default function VehicleQuestionnaire() {
                 Progress: {Object.keys(answers).length} of {vehicleQuestions.length} questions answered
               </span>
               <div className="w-32 bg-imx-gray-200 rounded-full h-2">
-                <div 
+                <div
                   className="bg-imx-red h-2 rounded-full transition-all duration-300"
                   style={{ width: `${(Object.keys(answers).length / vehicleQuestions.length) * 100}%` }}
                 ></div>
@@ -251,13 +301,13 @@ export default function VehicleQuestionnaire() {
           </div>
 
           {/* Questions */}
-          <div className="space-y-8">
+          <div className="space-y-6">
             {vehicleQuestions.map((question, index) => (
               <div key={question.id} className="border border-imx-gray-200 rounded-lg p-6">
                 <h3 className="text-lg font-semibold text-imx-black mb-4">
                   {index + 1}. {question.question}
                 </h3>
-                
+
                 <RadioGroup
                   value={answers[question.id] || ''}
                   onValueChange={(value) => handleAnswerChange(question.id, value)}
@@ -265,12 +315,12 @@ export default function VehicleQuestionnaire() {
                 >
                   {question.options.map((option, optionIndex) => (
                     <div key={optionIndex} className="flex items-center space-x-3">
-                      <RadioGroupItem 
-                        value={option} 
+                      <RadioGroupItem
+                        value={option}
                         id={`${question.id}-${optionIndex}`}
                         className="border-imx-gray-300 text-imx-red focus:ring-imx-red"
                       />
-                      <Label 
+                      <Label
                         htmlFor={`${question.id}-${optionIndex}`}
                         className="text-imx-gray-700 cursor-pointer hover:text-imx-black transition-colors"
                       >
@@ -281,6 +331,20 @@ export default function VehicleQuestionnaire() {
                 </RadioGroup>
               </div>
             ))}
+          </div>
+
+          {/* Comments Section */}
+          <div className="mt-8 p-6 bg-imx-gray-50 rounded-lg border border-imx-gray-200">
+            <Label htmlFor="comments" className="text-lg font-semibold text-imx-black block mb-4">
+              Comments
+            </Label>
+            <Textarea
+              id="comments"
+              placeholder="Any additional details..."
+              value={comments}
+              onChange={handleCommentsChange}
+              className="min-h-[100px]"
+            />
           </div>
 
           {/* Navigation */}
@@ -297,7 +361,7 @@ export default function VehicleQuestionnaire() {
             <div className="flex items-center space-x-4">
               {!isComplete() && (
                 <span className="text-sm text-imx-gray-500">
-                  Please answer all questions to continue
+                  Please answer all questions and enter mileage to continue
                 </span>
               )}
               <Button

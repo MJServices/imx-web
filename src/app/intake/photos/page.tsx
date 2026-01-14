@@ -30,60 +30,77 @@ const vehiclePhotoTypes: VehiclePhotoType[] = [
     id: 'front_view',
     title: 'Front View',
     description: 'Clear front view of the entire vehicle',
+    exampleImage: '/cars pic/Front View.jpeg',
     required: true
   },
   {
-    id: 'rear_view',
-    title: 'Rear View',
+    id: 'exterior_rear_view',
+    title: 'Exterior Rear View',
     description: 'Clear rear view showing license plate area',
+    exampleImage: '/cars pic/Exterior_Rear_View.jpeg',
     required: true
   },
   {
-    id: 'driver_side',
-    title: 'Driver Side',
+    id: 'exterior_left_door_panel',
+    title: 'Exterior Left Door Panel',
     description: 'Full side view from driver\'s side',
+    exampleImage: '/cars pic/Exterior_Left_Door_Panel.jpeg',
     required: true
   },
   {
-    id: 'passenger_side',
-    title: 'Passenger Side',
-    description: 'Full side view from passenger side',
+    id: 'exterior_trunk_cargo_area',
+    title: 'Exterior Trunk Cargo Area',
+    description: 'View of the trunk or cargo space',
+    exampleImage: '/cars pic/Exterior_Trunk_Cargo_Area.jpeg',
     required: true
   },
   {
-    id: 'interior_front',
+    id: 'interior_front_seats',
     title: 'Interior - Front Seats',
     description: 'Dashboard, front seats, and steering wheel',
+    exampleImage: '/cars pic/Interior - Front Seats.jpeg',
     required: true
   },
   {
-    id: 'interior_rear',
-    title: 'Interior - Rear Seats',
+    id: 'interior_driver_side_dashboard',
+    title: 'Interior Driver Side Dashboard',
+    description: 'Close up of the dashboard from driver side',
+    exampleImage: '/cars pic/Interior_Driver_Side_Dashboard.jpeg',
+    required: true
+  },
+  {
+    id: 'interior_rear_door_open_view',
+    title: 'Interior Rear Door Open View',
+    description: 'View with rear door open',
+    exampleImage: '/cars pic/Interior_Rear_Door_Open_View.jpeg',
+    required: true
+  },
+  {
+    id: 'interior_rear_seat_area',
+    title: 'Interior Rear Seat Area',
     description: 'Rear seating area and space',
+    exampleImage: '/cars pic/Interior_Rear_Seat_Area.jpeg',
     required: true
   },
   {
-    id: 'odometer',
+    id: 'odometer_reading',
     title: 'Odometer Reading',
     description: 'Clear photo of current mileage display',
+    exampleImage: '/cars pic/Odometer Reading.jpeg',
     required: true
   },
   {
-    id: 'engine_bay',
-    title: 'Engine Bay',
+    id: 'engine_compartment',
+    title: 'Engine Compartment',
     description: 'Open hood showing engine compartment',
+    exampleImage: '/cars pic/Engine_Compartment.jpeg',
     required: true
   },
   {
     id: 'wheels_tires',
     title: 'Wheels & Tires',
     description: 'Close-up of wheels and tire condition',
-    required: true
-  },
-  {
-    id: 'vin_number',
-    title: 'VIN Number',
-    description: 'Clear photo of VIN plate or sticker',
+    exampleImage: '/cars pic/Wheels & Tires.jpeg',
     required: true
   }
 ];
@@ -99,7 +116,7 @@ export default function IntakePhotos() {
   useEffect(() => {
     const loadExistingPhotos = async () => {
       if (!submissionId) return;
-      
+
       setIsLoading(true);
       try {
         const { data, error } = await supabase
@@ -150,13 +167,13 @@ export default function IntakePhotos() {
   };
 
   const getUploadedRequiredPhotosCount = () => {
-    return vehiclePhotoTypes.filter(type => 
+    return vehiclePhotoTypes.filter(type =>
       type.required && uploadedPhotos[type.id]
     ).length;
   };
 
   const isAllRequiredPhotosUploaded = () => {
-    return vehiclePhotoTypes.every(type => 
+    return vehiclePhotoTypes.every(type =>
       !type.required || uploadedPhotos[type.id]
     );
   };
@@ -169,7 +186,7 @@ export default function IntakePhotos() {
       // Update the intake form status to completed
       const { error } = await supabase
         .from('intake_forms')
-        .update({ 
+        .update({
           updated_at: new Date().toISOString(),
           status: 'completed'
         })
@@ -183,11 +200,11 @@ export default function IntakePhotos() {
 
       // Clear the submission ID from localStorage
       localStorage.removeItem('intake_submission_id');
-      
+
       // Show success message and redirect
       alert('Vehicle intake completed successfully! Thank you for providing all the required information and photos.');
       router.push('/admin');
-      
+
     } catch (error) {
       console.error('Error completing intake:', error);
       alert('Error completing intake. Please try again.');
@@ -245,10 +262,10 @@ export default function IntakePhotos() {
                 </p>
               </div>
               <div className="w-32 bg-imx-gray-200 rounded-full h-3">
-                <div 
+                <div
                   className="bg-imx-red h-3 rounded-full transition-all duration-300"
-                  style={{ 
-                    width: `${(getUploadedRequiredPhotosCount() / getRequiredPhotosCount()) * 100}%` 
+                  style={{
+                    width: `${(getUploadedRequiredPhotosCount() / getRequiredPhotosCount()) * 100}%`
                   }}
                 ></div>
               </div>
