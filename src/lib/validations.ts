@@ -12,7 +12,13 @@ export const vehicleInfoSchema = z.object({
   vehicleYear: z.string().min(1, 'Vehicle year is required'),
   make: z.string().min(1, 'Vehicle make is required'),
   model: z.string().min(1, 'Vehicle model is required'),
-  ownership: z.string().min(1, 'Ownership type is required')
+  ownership: z.string().min(1, 'Ownership type is required'),
+  vinNumber: z.string()
+    .min(17, 'VIN must be exactly 17 characters')
+    .max(17, 'VIN must be exactly 17 characters')
+    .regex(/^[A-HJ-NPR-Z0-9]+$/i, 'VIN contains invalid characters (I, O, Q are not allowed)')
+    .transform(val => val.toUpperCase())
+
 })
 
 export const fullFormSchema = personalInfoSchema.merge(vehicleInfoSchema)

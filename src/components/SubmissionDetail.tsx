@@ -15,6 +15,7 @@ interface Submission {
   make: string;
   model: string;
   ownership: string;
+  vin_number?: string;
   status: string;
   created_at: string;
   updated_at: string;
@@ -145,6 +146,7 @@ export default function SubmissionDetail({ submission, onBack }: SubmissionDetai
         'Customer Name': `${submission.first_name} ${submission.last_name}`,
         'Phone Number': submission.phone_number,
         'Vehicle': `${submission.vehicle_year} ${submission.make} ${submission.model}`,
+        'VIN': submission.vin_number || 'N/A',
         'Ownership': submission.ownership,
         'Status': submission.status,
         'Created': formatDate(submission.created_at),
@@ -231,6 +233,11 @@ export default function SubmissionDetail({ submission, onBack }: SubmissionDetai
               <FileText className="w-4 h-4 mr-2" />
               {submission.ownership}
             </div>
+            {submission.vin_number && (
+              <div className="flex items-center text-imx-gray-600">
+                <span className="font-mono text-sm border px-1 rounded bg-gray-50">{submission.vin_number}</span>
+              </div>
+            )}
           </div>
         </div>
       </div>
@@ -274,6 +281,12 @@ export default function SubmissionDetail({ submission, onBack }: SubmissionDetai
             <label className="text-sm font-medium text-imx-gray-600">Ownership</label>
             <p className="text-imx-black">{submission.ownership}</p>
           </div>
+          {submission.vin_number && (
+            <div>
+              <label className="text-sm font-medium text-imx-gray-600">VIN</label>
+              <p className="text-imx-black font-mono">{submission.vin_number}</p>
+            </div>
+          )}
         </div>
       </div>
 

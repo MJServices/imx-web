@@ -22,11 +22,11 @@ export default function IntakeQuestions() {
   const { submissionId } = useSubmissionId();
 
   const vehicleYears = Array.from({ length: 30 }, (_, i) => (2024 - i).toString());
-  
+
   const vehicleMakes = [
-    'Acura', 'Audi', 'BMW', 'Buick', 'Cadillac', 'Chevrolet', 'Chrysler', 
-    'Dodge', 'Ford', 'GMC', 'Honda', 'Hyundai', 'Infiniti', 'Jeep', 'Kia', 
-    'Lexus', 'Lincoln', 'Mazda', 'Mercedes-Benz', 'Mitsubishi', 'Nissan', 
+    'Acura', 'Audi', 'BMW', 'Buick', 'Cadillac', 'Chevrolet', 'Chrysler',
+    'Dodge', 'Ford', 'GMC', 'Honda', 'Hyundai', 'Infiniti', 'Jeep', 'Kia',
+    'Lexus', 'Lincoln', 'Mazda', 'Mercedes-Benz', 'Mitsubishi', 'Nissan',
     'Ram', 'Subaru', 'Tesla', 'Toyota', 'Volkswagen', 'Volvo'
   ];
 
@@ -79,7 +79,8 @@ export default function IntakeQuestions() {
       vehicleYear: '',
       make: '',
       model: '',
-      ownership: ''
+      ownership: '',
+      vinNumber: ''
     }
   });
 
@@ -91,7 +92,7 @@ export default function IntakeQuestions() {
   useEffect(() => {
     const loadExistingData = async () => {
       if (!submissionId) return;
-      
+
       setIsLoading(true);
       try {
         const { data, error } = await supabase
@@ -112,7 +113,8 @@ export default function IntakeQuestions() {
             vehicleYear: data.vehicle_year || '',
             make: data.make || '',
             model: data.model || '',
-            ownership: data.ownership || ''
+            ownership: data.ownership || '',
+            vinNumber: data.vin_number || ''
           });
         }
       } catch (error) {
@@ -128,7 +130,7 @@ export default function IntakeQuestions() {
   // Save data to Supabase instantly on change
   const saveToSupabase = async (data: Partial<IntakeFormData>) => {
     if (!submissionId) return;
-    
+
     setIsSaving(true);
     try {
       const { error } = await supabase
@@ -154,14 +156,14 @@ export default function IntakeQuestions() {
   // Handle personal info changes
   const handlePersonalInfoChange = (field: keyof PersonalInfoFormData, value: string) => {
     personalForm.setValue(field, value);
-    
+
     // Save to Supabase instantly
     const fieldMap = {
       firstName: 'first_name',
       lastName: 'last_name',
       phoneNumber: 'phone_number'
     };
-    
+
     saveToSupabase({
       [fieldMap[field]]: value
     });
@@ -170,30 +172,31 @@ export default function IntakeQuestions() {
   // Handle vehicle info changes
   const handleVehicleInfoChange = (field: keyof VehicleInfoFormData, value: string) => {
     vehicleForm.setValue(field, value);
-    
+
     // Reset model if make changes
     if (field === 'make') {
       vehicleForm.setValue('model', '');
       vehicleForm.clearErrors('model'); // Clear any validation errors
     }
-    
+
     // Save to Supabase instantly
     const fieldMap = {
       vehicleYear: 'vehicle_year',
       make: 'make',
       model: 'model',
-      ownership: 'ownership'
+      ownership: 'ownership',
+      vinNumber: 'vin_number'
     };
-    
+
     const updateData: Partial<IntakeFormData> = {
       [fieldMap[field]]: value
     };
-    
+
     // Clear model in database if make changes
     if (field === 'make') {
       updateData.model = '';
     }
-    
+
     saveToSupabase(updateData);
   };
 
@@ -258,7 +261,7 @@ export default function IntakeQuestions() {
               </div>
             </div>
             <div className="w-full bg-imx-gray-200 rounded-full h-2">
-              <div 
+              <div
                 className="bg-imx-red h-2 rounded-full transition-all duration-300"
                 style={{ width: `${(currentStep / 2) * 33.33}%` }}
               ></div>
@@ -281,7 +284,7 @@ export default function IntakeQuestions() {
                       <FormItem>
                         <FormLabel>First Name *</FormLabel>
                         <FormControl>
-                          <Input 
+                          <Input
                             {...field}
                             placeholder="Enter your first name"
                             onChange={(e) => {
@@ -294,7 +297,7 @@ export default function IntakeQuestions() {
                       </FormItem>
                     )}
                   />
-                  
+
                   <FormField
                     control={personalForm.control}
                     name="lastName"
@@ -302,7 +305,7 @@ export default function IntakeQuestions() {
                       <FormItem>
                         <FormLabel>Last Name *</FormLabel>
                         <FormControl>
-                          <Input 
+                          <Input
                             {...field}
                             placeholder="Enter your last name"
                             onChange={(e) => {
@@ -316,7 +319,7 @@ export default function IntakeQuestions() {
                     )}
                   />
                 </div>
-                
+
                 <FormField
                   control={personalForm.control}
                   name="phoneNumber"
@@ -324,7 +327,7 @@ export default function IntakeQuestions() {
                     <FormItem>
                       <FormLabel>Phone Number *</FormLabel>
                       <FormControl>
-                        <Input 
+                        <Input
                           {...field}
                           type="tel"
                           placeholder="(555) 123-4567"
@@ -353,7 +356,7 @@ export default function IntakeQuestions() {
                     render={({ field }) => (
                       <FormItem>
                         <FormLabel>Vehicle Year *</FormLabel>
-                        <Select 
+                        <Select
                           onValueChange={(value) => {
                             field.onChange(value);
                             handleVehicleInfoChange('vehicleYear', value);
@@ -375,14 +378,14 @@ export default function IntakeQuestions() {
                       </FormItem>
                     )}
                   />
-                  
+
                   <FormField
                     control={vehicleForm.control}
                     name="make"
                     render={({ field }) => (
                       <FormItem>
                         <FormLabel>Make *</FormLabel>
-                        <Select 
+                        <Select
                           onValueChange={(value) => {
                             field.onChange(value);
                             handleVehicleInfoChange('make', value);
@@ -413,7 +416,7 @@ export default function IntakeQuestions() {
                     render={({ field }) => (
                       <FormItem>
                         <FormLabel>Model *</FormLabel>
-                        <Select 
+                        <Select
                           onValueChange={(value) => {
                             field.onChange(value);
                             handleVehicleInfoChange('model', value);
@@ -443,7 +446,7 @@ export default function IntakeQuestions() {
                     render={({ field }) => (
                       <FormItem>
                         <FormLabel>Ownership *</FormLabel>
-                        <Select 
+                        <Select
                           onValueChange={(value) => {
                             field.onChange(value);
                             handleVehicleInfoChange('ownership', value);
@@ -461,6 +464,36 @@ export default function IntakeQuestions() {
                             ))}
                           </SelectContent>
                         </Select>
+                        <FormMessage />
+                      </FormItem>
+                    )}
+                  />
+                </div>
+
+                <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
+                  <FormField
+                    control={vehicleForm.control}
+                    name="vinNumber"
+                    render={({ field }) => (
+                      <FormItem>
+                        <FormLabel>VIN (Vehicle Identification Number) *</FormLabel>
+                        <FormControl>
+                          <Input
+                            {...field}
+                            placeholder="Enter 17-character VIN"
+                            maxLength={17}
+                            onChange={(e) => {
+                              // Auto-uppercase and remove invalid chars as they type
+                              const val = e.target.value.toUpperCase().replace(/[^A-HJ-NPR-Z0-9]/g, '');
+                              field.onChange(val);
+                              // We wait for validation before saving, or debounce in full impl
+                              // For now, we'll try to save but validation prevents bad data
+                              if (val.length === 17) {
+                                handleVehicleInfoChange('vinNumber', val);
+                              }
+                            }}
+                          />
+                        </FormControl>
                         <FormMessage />
                       </FormItem>
                     )}

@@ -19,6 +19,7 @@ interface Submission {
   status: string;
   current_mileage?: string;
   comments?: string;
+  vin_number?: string;
   created_at: string;
   updated_at: string;
 }
@@ -135,6 +136,7 @@ export default function SubmissionDetailView({ submission, onBack }: SubmissionD
           make: submission.make,
           model: submission.model,
           ownership: submission.ownership,
+          vin: submission.vin_number,
           mileage: submission.current_mileage,
           comments: submission.comments
         },
@@ -277,6 +279,12 @@ export default function SubmissionDetailView({ submission, onBack }: SubmissionD
                 <p className="text-imx-black">{submission.ownership}</p>
               </div>
             </div>
+            {submission.vin_number && (
+              <div>
+                <label className="text-sm font-medium text-imx-gray-600">VIN</label>
+                <p className="text-imx-black font-mono">{submission.vin_number}</p>
+              </div>
+            )}
             {submission.current_mileage && (
               <div>
                 <label className="text-sm font-medium text-imx-gray-600">Current Mileage</label>

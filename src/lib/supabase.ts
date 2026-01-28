@@ -15,6 +15,7 @@ export type IntakeFormData = {
   make: string
   model: string
   ownership: string
+  vin_number?: string
   created_at?: string
   updated_at?: string
 }

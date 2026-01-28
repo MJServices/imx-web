@@ -31,6 +31,7 @@ interface Submission {
   questionnaire_completed: boolean;
   current_mileage?: string;
   comments?: string;
+  vin_number?: string;
 }
 
 export default function AdminSubmissions() {
@@ -108,6 +109,7 @@ export default function AdminSubmissions() {
           status: submission.status || "in_progress",
           current_mileage: submission.current_mileage,
           comments: submission.comments,
+          vin_number: submission.vin_number,
         })
       );
 
@@ -215,6 +217,7 @@ export default function AdminSubmissions() {
       "Customer Name": `${submission.first_name} ${submission.last_name}`,
       Phone: submission.phone_number,
       Vehicle: `${submission.vehicle_year} ${submission.make} ${submission.model}`,
+      VIN: submission.vin_number || "N/A",
       Ownership: submission.ownership,
       Status: submission.status,
       Photos: submission.photos_count,
