@@ -13,7 +13,7 @@ import {
 } from "@/components/ui/select";
 import { Badge } from "@/components/ui/badge";
 import SubmissionDetailView from "@/components/SubmissionDetailView";
-import { Eye, Download, Filter, Search, Calendar } from "lucide-react";
+import { Eye, Download, Filter, Search, Calendar, Trash2 } from "lucide-react";
 
 interface Submission {
   submission_id: string;
@@ -246,11 +246,60 @@ export default function AdminSubmissions() {
     window.URL.revokeObjectURL(url);
   };
 
+  const handleDeleteSubmission = async (submissionId: string) => {
+    if (
+      !window.confirm(
+        "Are you sure you want to delete this submission? This action cannot be undone."
+      )
+    ) {
+      return;
+    }
+
+    try {
+      // Delete photos first (referencing table)
+      const { error: photosError } = await supabase
+        .from("intake_photos")
+        .delete()
+        .eq("submission_id", submissionId);
+
+      if (photosError) throw photosError;
+
+      // Delete questionnaire answers
+      const { error: questionnaireError } = await supabase
+        .from("vehicle_questionnaire")
+        .delete()
+        .eq("submission_id", submissionId);
+
+      if (questionnaireError) throw questionnaireError;
+
+      // Finally delete the submission
+      const { error: submissionError } = await supabase
+        .from("intake_forms")
+        .delete()
+        .eq("submission_id", submissionId);
+
+      if (submissionError) throw submissionError;
+
+      // Update local state
+      setSubmissions((prev) =>
+        prev.filter((s) => s.submission_id !== submissionId)
+      );
+      setFilteredSubmissions((prev) =>
+        prev.filter((s) => s.submission_id !== submissionId)
+      );
+      setSelectedSubmission(null);
+    } catch (error) {
+      console.error("Error deleting submission:", error);
+      alert("Failed to delete submission. Please try again.");
+    }
+  };
+
   if (selectedSubmission) {
     return (
       <SubmissionDetailView
         submission={selectedSubmission}
         onBack={() => setSelectedSubmission(null)}
+        onDelete={handleDeleteSubmission}
       />
     );
   }
@@ -259,22 +308,22 @@ export default function AdminSubmissions() {
     <div className="bg-white rounded-lg shadow-lg border border-imx-gray-200">
       {/* Header */}
       <div className="p-6 border-b border-imx-gray-200">
-        <div className="flex items-center justify-between mb-4">
+        <div className="flex flex-col md:flex-row md:items-center justify-between mb-4 space-y-4 md:space-y-0">
           <h2 className="text-xl font-bold text-imx-black">
             Vehicle Submissions
           </h2>
-          <div className="flex items-center space-x-3">
+          <div className="flex items-center space-x-3 w-full md:w-auto">
             <Button
               variant="outline"
               onClick={() => setShowFilters(!showFilters)}
-              className="border-imx-gray-300 text-imx-gray-700 hover:bg-imx-gray-50"
+              className="flex-1 md:flex-none border-imx-gray-300 text-imx-gray-700 hover:bg-imx-gray-50"
             >
               <Filter className="w-4 h-4 mr-2" />
               Filters
             </Button>
             <Button
               onClick={handleExportData}
-              className="bg-imx-red text-white hover:bg-red-700"
+              className="flex-1 md:flex-none bg-imx-red text-white hover:bg-red-700"
             >
               <Download className="w-4 h-4 mr-2" />
               Export
@@ -437,6 +486,17 @@ export default function AdminSubmissions() {
                     >
                       <Eye className="w-4 h-4 mr-1" />
                       View
+                    </Button>
+                    <Button
+                      variant="outline"
+                      size="sm"
+                      onClick={() =>
+                        handleDeleteSubmission(submission.submission_id)
+                      }
+                      className="border-red-200 text-red-600 hover:bg-red-50 hover:border-red-300 hover:text-red-700"
+                    >
+                      <Trash2 className="w-4 h-4 mr-1" />
+                      Delete
                     </Button>
                   </td>
                 </tr>

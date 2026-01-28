@@ -214,13 +214,12 @@ export default function AdminPanel() {
                         Password Strength:
                       </span>
                       <span
-                        className={`text-xs font-medium ${
-                          passwordStrength === "weak"
+                        className={`text-xs font-medium ${passwordStrength === "weak"
                             ? "text-red-600"
                             : passwordStrength === "medium"
-                            ? "text-yellow-600"
-                            : "text-green-600"
-                        }`}
+                              ? "text-yellow-600"
+                              : "text-green-600"
+                          }`}
                       >
                         {passwordStrength.toUpperCase()}
                       </span>
@@ -229,11 +228,10 @@ export default function AdminPanel() {
                     {/* Password Requirements */}
                     <div className="text-xs space-y-1">
                       <div
-                        className={`flex items-center ${
-                          passwordRequirements.length
+                        className={`flex items-center ${passwordRequirements.length
                             ? "text-green-600"
                             : "text-red-600"
-                        }`}
+                          }`}
                       >
                         <span className="mr-1">
                           {passwordRequirements.length ? "✓" : "✗"}
@@ -241,11 +239,10 @@ export default function AdminPanel() {
                         At least 12 characters
                       </div>
                       <div
-                        className={`flex items-center ${
-                          passwordRequirements.uppercase
+                        className={`flex items-center ${passwordRequirements.uppercase
                             ? "text-green-600"
                             : "text-red-600"
-                        }`}
+                          }`}
                       >
                         <span className="mr-1">
                           {passwordRequirements.uppercase ? "✓" : "✗"}
@@ -253,11 +250,10 @@ export default function AdminPanel() {
                         One uppercase letter
                       </div>
                       <div
-                        className={`flex items-center ${
-                          passwordRequirements.lowercase
+                        className={`flex items-center ${passwordRequirements.lowercase
                             ? "text-green-600"
                             : "text-red-600"
-                        }`}
+                          }`}
                       >
                         <span className="mr-1">
                           {passwordRequirements.lowercase ? "✓" : "✗"}
@@ -265,11 +261,10 @@ export default function AdminPanel() {
                         One lowercase letter
                       </div>
                       <div
-                        className={`flex items-center ${
-                          passwordRequirements.numbers
+                        className={`flex items-center ${passwordRequirements.numbers
                             ? "text-green-600"
                             : "text-red-600"
-                        }`}
+                          }`}
                       >
                         <span className="mr-1">
                           {passwordRequirements.numbers ? "✓" : "✗"}
@@ -277,11 +272,10 @@ export default function AdminPanel() {
                         One number
                       </div>
                       <div
-                        className={`flex items-center ${
-                          passwordRequirements.special
+                        className={`flex items-center ${passwordRequirements.special
                             ? "text-green-600"
                             : "text-red-600"
-                        }`}
+                          }`}
                       >
                         <span className="mr-1">
                           {passwordRequirements.special ? "✓" : "✗"}
@@ -289,11 +283,10 @@ export default function AdminPanel() {
                         One special character
                       </div>
                       <div
-                        className={`flex items-center ${
-                          passwordRequirements.noCommon
+                        className={`flex items-center ${passwordRequirements.noCommon
                             ? "text-green-600"
                             : "text-red-600"
-                        }`}
+                          }`}
                       >
                         <span className="mr-1">
                           {passwordRequirements.noCommon ? "✓" : "✗"}
@@ -330,26 +323,26 @@ export default function AdminPanel() {
   return (
     <div className="min-h-screen bg-imx-gray-50">
       <Header />
-      <div className="py-8">
+      <div className="py-8 px-4 md:px-6">
         <div className="max-w-6xl mx-auto">
           {/* Admin Header */}
           <div className="bg-white rounded-lg shadow-lg border border-imx-gray-200 p-6 mb-6">
-            <div className="flex items-center justify-between">
+            <div className="flex flex-col md:flex-row md:items-center justify-between gap-4">
               <div>
-                <h1 className="text-2xl font-bold text-imx-black mb-2">
+                <h1 className="text-xl md:text-2xl font-bold text-imx-black mb-1 md:mb-2">
                   IMX Auto Group - Admin Panel
                 </h1>
-                <p className="text-imx-gray-600">Welcome back, {user.email}</p>
+                <p className="text-sm md:text-base text-imx-gray-600">Welcome back, {user.email}</p>
               </div>
-              <div className="flex items-center space-x-4">
-                <div className="text-right">
-                  <p className="text-sm text-imx-gray-500">Signed in as</p>
-                  <p className="font-medium text-imx-black">{user.email}</p>
+              <div className="flex flex-col md:flex-row items-start md:items-center gap-4 md:space-x-4">
+                <div className="text-left md:text-right">
+                  <p className="text-xs md:text-sm text-imx-gray-500">Signed in as</p>
+                  <p className="text-sm md:text-base font-medium text-imx-black break-all">{user.email}</p>
                 </div>
                 <Button
                   onClick={handleSignOut}
                   variant="outline"
-                  className="border-imx-gray-300 text-imx-gray-700 hover:bg-imx-gray-50"
+                  className="w-full md:w-auto border-imx-gray-300 text-imx-gray-700 hover:bg-imx-gray-50"
                 >
                   Sign Out
                 </Button>

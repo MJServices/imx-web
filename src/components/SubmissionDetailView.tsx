@@ -5,7 +5,7 @@ import { supabase } from '@/lib/supabase';
 import { Button } from '@/components/ui/button';
 import { Badge } from '@/components/ui/badge';
 import { Card, CardContent, CardHeader, CardTitle } from '@/components/ui/card';
-import { ArrowLeft, Download, Phone, Mail, Calendar, Car, FileText, Camera, User } from 'lucide-react';
+import { ArrowLeft, Download, Phone, Mail, Calendar, Car, FileText, Camera, User, Trash2 } from 'lucide-react';
 
 interface Submission {
   submission_id: string;
@@ -42,9 +42,10 @@ interface Photo {
 interface SubmissionDetailViewProps {
   submission: Submission;
   onBack: () => void;
+  onDelete: (id: string) => void;
 }
 
-export default function SubmissionDetailView({ submission, onBack }: SubmissionDetailViewProps) {
+export default function SubmissionDetailView({ submission, onBack, onDelete }: SubmissionDetailViewProps) {
   const [questionnaireAnswers, setQuestionnaireAnswers] = useState<QuestionnaireAnswer[]>([]);
   const [photos, setPhotos] = useState<Photo[]>([]);
   const [isLoading, setIsLoading] = useState(true);
@@ -180,26 +181,36 @@ export default function SubmissionDetailView({ submission, onBack }: SubmissionD
   return (
     <div className="space-y-6">
       {/* Header */}
-      <div className="bg-white rounded-lg shadow-lg border border-imx-gray-200 p-6">
-        <div className="flex items-center justify-between">
-          <div className="flex items-center space-x-4">
-            <Button variant="outline" onClick={onBack} className="border-imx-gray-300">
+      <div className="bg-white rounded-lg shadow-lg border border-imx-gray-200 p-4 md:p-6">
+        <div className="flex flex-col md:flex-row items-start md:items-center justify-between space-y-4 md:space-y-0">
+          <div className="flex flex-col md:flex-row items-start md:items-center space-y-4 md:space-y-0 md:space-x-4 w-full">
+            <Button variant="outline" onClick={onBack} className="w-full md:w-auto border-imx-gray-300">
               <ArrowLeft className="w-4 h-4 mr-2" />
               Back to List
             </Button>
             <div>
-              <h1 className="text-2xl font-bold text-imx-black">
+              <h1 className="text-xl md:text-2xl font-bold text-imx-black">
                 {submission.first_name} {submission.last_name}
               </h1>
-              <p className="text-imx-gray-600">Submission ID: {submission.submission_id}</p>
+              <p className="text-sm text-imx-gray-600">ID: {submission.submission_id}</p>
             </div>
           </div>
-          <div className="flex items-center space-x-3">
+          <div className="flex flex-wrap items-center gap-2 w-full md:w-auto">
             {getStatusBadge(submission.status)}
-            <Button onClick={handleExportSubmission} className="bg-imx-red text-white hover:bg-red-700">
-              <Download className="w-4 h-4 mr-2" />
-              Export
-            </Button>
+            <div className="flex-1 md:flex-none flex items-center space-x-2">
+              <Button onClick={handleExportSubmission} className="flex-1 md:flex-none bg-imx-red text-white hover:bg-red-700">
+                <Download className="w-4 h-4 md:mr-2" />
+                <span className="hidden md:inline">Export</span>
+              </Button>
+              <Button
+                variant="outline"
+                onClick={() => onDelete(submission.submission_id)}
+                className="flex-1 md:flex-none border-red-200 text-red-600 hover:bg-red-50 hover:border-red-300 hover:text-red-700"
+              >
+                <Trash2 className="w-4 h-4 md:mr-2" />
+                <span className="hidden md:inline">Delete</span>
+              </Button>
+            </div>
           </div>
         </div>
       </div>
