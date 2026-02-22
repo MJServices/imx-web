@@ -2,13 +2,20 @@ import { NextRequest, NextResponse } from 'next/server';
 import { Resend } from 'resend';
 import { createClient } from '@supabase/supabase-js';
 
-const resend = new Resend(process.env.RESEND_API_KEY);
 const supabaseUrl = process.env.NEXT_PUBLIC_SUPABASE_URL!;
 const supabaseKey = process.env.NEXT_PUBLIC_SUPABASE_ANON_KEY!;
 const supabase = createClient(supabaseUrl, supabaseKey);
 
 export async function POST(req: NextRequest) {
     try {
+        // Instantiate Resend inside the handler to avoid build-time errors
+        const apiKey = process.env.RESEND_API_KEY;
+        if (!apiKey || apiKey === 're_your_api_key_here') {
+            console.error('Missing or invalid RESEND_API_KEY');
+            return NextResponse.json({ error: 'Email service not configured' }, { status: 500 });
+        }
+        const resend = new Resend(apiKey);
+
         const { submissionId } = await req.json();
 
         if (!submissionId) {
