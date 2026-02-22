@@ -14,13 +14,13 @@ const supabase = createClient(supabaseUrl, supabaseKey);
 async function testRLSSetup() {
   console.log('🔒 Testing RLS (Row Level Security) Setup...');
   console.log('');
-  
+
   try {
     // 1. Test database table access
     console.log('1. Testing database table access...');
-    
+
     const testSubmissionId = 'rls_test_' + Date.now();
-    
+
     // Test intake_forms insert
     const { data: formData, error: formError } = await supabase
       .from('intake_forms')
@@ -76,14 +76,14 @@ async function testRLSSetup() {
 
     // 2. Test storage bucket access
     console.log('2. Testing storage bucket access...');
-    
+
     const { data: buckets, error: bucketError } = await supabase.storage.listBuckets();
-    
+
     if (bucketError) {
       console.log('❌ Storage bucket access:', bucketError.message);
     } else {
       const intakeBucket = buckets.find(bucket => bucket.name === 'intake-photos');
-      
+
       if (!intakeBucket) {
         console.log('❌ intake-photos bucket: Not found');
         console.log('   📝 The SQL should have created it automatically');
@@ -97,7 +97,7 @@ async function testRLSSetup() {
     // 3. Test file upload to storage
     if (buckets && buckets.find(b => b.name === 'intake-photos')) {
       console.log('3. Testing file upload with RLS...');
-      
+
       const testFilePath = `${testSubmissionId}/rls_test.txt`;
       const { data: uploadData, error: uploadError } = await supabase.storage
         .from('intake-photos')
@@ -109,14 +109,14 @@ async function testRLSSetup() {
         console.log('❌ File upload:', uploadError.message);
       } else {
         console.log('✅ File upload: Working');
-        
+
         // Test file access
         const { data: urlData } = supabase.storage
           .from('intake-photos')
           .getPublicUrl(testFilePath);
-        
+
         console.log('✅ Public URL generation: Working');
-        
+
         // Clean up test file
         await supabase.storage.from('intake-photos').remove([testFilePath]);
         console.log('✅ File cleanup: Working');
@@ -125,7 +125,7 @@ async function testRLSSetup() {
 
     // 4. Test data reading
     console.log('4. Testing data reading...');
-    
+
     const { data: readForms, error: readError } = await supabase
       .from('intake_forms')
       .select('*')
@@ -140,11 +140,11 @@ async function testRLSSetup() {
 
     // Clean up test data
     console.log('5. Cleaning up test data...');
-    
+
     await supabase.from('intake_forms').delete().eq('submission_id', testSubmissionId);
     await supabase.from('vehicle_questionnaire').delete().eq('submission_id', testSubmissionId);
     await supabase.from('intake_photos').delete().eq('submission_id', testSubmissionId);
-    
+
     console.log('✅ Test data cleaned up');
 
     console.log('');
@@ -153,7 +153,7 @@ async function testRLSSetup() {
     console.log('📋 RLS Configuration:');
     console.log('- Public Users: ✅ Can insert/read/update their own data');
     console.log('- Storage Access: ✅ Can upload/download files');
-    console.log('- Admin Access: ✅ @imxautogroup.com emails have full access');
+    console.log('- Admin Access: ✅ @imxauto.com emails have full access');
     console.log('');
     console.log('🔒 Security Features:');
     console.log('- Row Level Security: ✅ Enabled on all tables');
@@ -161,7 +161,7 @@ async function testRLSSetup() {
     console.log('- Admin Override: ✅ IMX Auto Group emails bypass restrictions');
     console.log('');
     console.log('🚀 System ready for production use!');
-    
+
   } catch (error) {
     console.error('❌ RLS test failed:', error.message);
   }

@@ -14,15 +14,16 @@ const supabase = createClient(supabaseUrl, supabaseKey);
 async function testAdminDashboard() {
   console.log('🎛️ Testing Admin Dashboard Features...');
   console.log('');
-  
+
   try {
     // 1. Test submissions data access
     console.log('1. Testing submissions data access...');
-    
+
     const { data: submissions, error: submissionsError } = await supabase
       .from('intake_forms')
       .select('*')
-      .order('created_at', { ascending: false })
+      .order('status', { ascending: true })
+      .order('updated_at', { ascending: false })
       .limit(5);
 
     if (submissionsError) {
@@ -37,7 +38,7 @@ async function testAdminDashboard() {
 
     // 2. Test questionnaire data access
     console.log('2. Testing questionnaire data access...');
-    
+
     const { data: questionnaire, error: questionnaireError } = await supabase
       .from('vehicle_questionnaire')
       .select('submission_id, question_id')
@@ -52,7 +53,7 @@ async function testAdminDashboard() {
 
     // 3. Test photos data access
     console.log('3. Testing photos data access...');
-    
+
     const { data: photos, error: photosError } = await supabase
       .from('intake_photos')
       .select('submission_id, photo_type, file_name')
@@ -71,9 +72,9 @@ async function testAdminDashboard() {
 
     // 4. Test storage access
     console.log('4. Testing storage access...');
-    
+
     const { data: buckets, error: storageError } = await supabase.storage.listBuckets();
-    
+
     if (storageError) {
       console.log('❌ Storage access:', storageError.message);
     } else {
@@ -88,7 +89,7 @@ async function testAdminDashboard() {
 
     // 5. Test data aggregation (for dashboard stats)
     console.log('5. Testing data aggregation...');
-    
+
     const stats = {
       total: submissions?.length || 0,
       completed: submissions?.filter(s => s.status === 'completed').length || 0,
@@ -137,7 +138,7 @@ async function testAdminDashboard() {
     console.log('3. View submissions list with filters');
     console.log('4. Click "View" to see detailed submission');
     console.log('5. Test export and download features');
-    
+
   } catch (error) {
     console.error('❌ Dashboard test failed:', error.message);
   }

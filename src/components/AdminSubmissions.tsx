@@ -67,7 +67,8 @@ export default function AdminSubmissions() {
       const { data: submissionsData, error: submissionsError } = await supabase
         .from("intake_forms")
         .select("*")
-        .order("created_at", { ascending: false });
+        .order("status", { ascending: true }) // 'completed' < 'in_progress'
+        .order("updated_at", { ascending: false });
 
       if (submissionsError) {
         console.error("Error loading submissions:", submissionsError);
@@ -463,7 +464,7 @@ export default function AdminSubmissions() {
                     </div>
                   </td>
                   <td className="px-6 py-4 whitespace-nowrap text-sm text-imx-gray-500">
-                    {formatDate(submission.created_at)}
+                    {formatDate(submission.updated_at)}
                   </td>
                   <td className="px-6 py-4 whitespace-nowrap">
                     {getStatusBadge(submission.status)}

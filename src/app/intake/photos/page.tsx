@@ -200,6 +200,20 @@ export default function IntakePhotos() {
         return;
       }
 
+      // Trigger admin email notification
+      try {
+        await fetch('/api/notify', {
+          method: 'POST',
+          headers: {
+            'Content-Type': 'application/json',
+          },
+          body: JSON.stringify({ submissionId }),
+        });
+      } catch (notifyError) {
+        // We don't want to block the user if notification fails
+        console.error("Error triggering notification:", notifyError);
+      }
+
       // Clear the submission ID from localStorage
       localStorage.removeItem("intake_submission_id");
 

@@ -12,8 +12,8 @@
 CREATE OR REPLACE FUNCTION is_admin(user_email text)
 RETURNS boolean AS $$
 BEGIN
-  -- Check if email ends with @imxautogroup.com
-  RETURN user_email LIKE '%@imxautogroup.com';
+  -- Check if email ends with @imxauto.com
+  RETURN user_email LIKE '%@imxauto.com';
 END;
 $$ LANGUAGE plpgsql SECURITY DEFINER;
 
@@ -22,7 +22,7 @@ CREATE OR REPLACE FUNCTION set_admin_role()
 RETURNS trigger AS $$
 BEGIN
   -- If user email is from IMX Auto Group, set admin role
-  IF NEW.email LIKE '%@imxautogroup.com' THEN
+  IF NEW.email LIKE '%@imxauto.com' THEN
     NEW.raw_user_meta_data = COALESCE(NEW.raw_user_meta_data, '{}'::jsonb) || '{"role": "admin"}'::jsonb;
   END IF;
   
@@ -54,7 +54,7 @@ ON intake_forms
 FOR SELECT
 TO authenticated
 USING (
-  auth.jwt() ->> 'email' LIKE '%@imxautogroup.com'
+  auth.jwt() ->> 'email' LIKE '%@imxauto.com'
   OR (auth.jwt() -> 'user_metadata' ->> 'role') = 'admin'
 );
 
@@ -63,11 +63,11 @@ ON intake_forms
 FOR UPDATE
 TO authenticated
 USING (
-  auth.jwt() ->> 'email' LIKE '%@imxautogroup.com'
+  auth.jwt() ->> 'email' LIKE '%@imxauto.com'
   OR (auth.jwt() -> 'user_metadata' ->> 'role') = 'admin'
 )
 WITH CHECK (
-  auth.jwt() ->> 'email' LIKE '%@imxautogroup.com'
+  auth.jwt() ->> 'email' LIKE '%@imxauto.com'
   OR (auth.jwt() -> 'user_metadata' ->> 'role') = 'admin'
 );
 
@@ -76,7 +76,7 @@ ON vehicle_questionnaire
 FOR SELECT
 TO authenticated
 USING (
-  auth.jwt() ->> 'email' LIKE '%@imxautogroup.com'
+  auth.jwt() ->> 'email' LIKE '%@imxauto.com'
   OR (auth.jwt() -> 'user_metadata' ->> 'role') = 'admin'
 );
 
@@ -85,7 +85,7 @@ ON intake_photos
 FOR SELECT
 TO authenticated
 USING (
-  auth.jwt() ->> 'email' LIKE '%@imxautogroup.com'
+  auth.jwt() ->> 'email' LIKE '%@imxauto.com'
   OR (auth.jwt() -> 'user_metadata' ->> 'role') = 'admin'
 );
 
@@ -94,11 +94,11 @@ ON intake_photos
 FOR UPDATE
 TO authenticated
 USING (
-  auth.jwt() ->> 'email' LIKE '%@imxautogroup.com'
+  auth.jwt() ->> 'email' LIKE '%@imxauto.com'
   OR (auth.jwt() -> 'user_metadata' ->> 'role') = 'admin'
 )
 WITH CHECK (
-  auth.jwt() ->> 'email' LIKE '%@imxautogroup.com'
+  auth.jwt() ->> 'email' LIKE '%@imxauto.com'
   OR (auth.jwt() -> 'user_metadata' ->> 'role') = 'admin'
 );
 
@@ -124,7 +124,7 @@ ON admin_dashboard_stats
 FOR SELECT
 TO authenticated
 USING (
-  auth.jwt() ->> 'email' LIKE '%@imxautogroup.com'
+  auth.jwt() ->> 'email' LIKE '%@imxauto.com'
   OR (auth.jwt() -> 'user_metadata' ->> 'role') = 'admin'
 );
 
@@ -152,7 +152,7 @@ RETURNS TABLE (
 BEGIN
   -- Check if user is admin
   IF NOT (
-    auth.jwt() ->> 'email' LIKE '%@imxautogroup.com'
+    auth.jwt() ->> 'email' LIKE '%@imxauto.com'
     OR (auth.jwt() -> 'user_metadata' ->> 'role') = 'admin'
   ) THEN
     RAISE EXCEPTION 'Access denied. Admin privileges required.';
@@ -183,7 +183,7 @@ BEGIN
     SELECT DISTINCT submission_id
     FROM vehicle_questionnaire
   ) q ON f.submission_id = q.submission_id
-  ORDER BY f.created_at DESC;
+  ORDER BY f.status ASC, f.updated_at DESC;
 END;
 $$ LANGUAGE plpgsql SECURITY DEFINER;
 
@@ -198,10 +198,10 @@ GRANT EXECUTE ON FUNCTION get_admin_submissions() TO authenticated;
 CREATE OR REPLACE FUNCTION validate_admin_email()
 RETURNS trigger AS $$
 BEGIN
-  -- Only allow @imxautogroup.com emails for admin accounts
+  -- Only allow @imxauto.com emails for admin accounts
   IF NEW.raw_user_meta_data ->> 'role' = 'admin' 
-     AND NEW.email NOT LIKE '%@imxautogroup.com' THEN
-    RAISE EXCEPTION 'Admin accounts must use @imxautogroup.com email addresses';
+     AND NEW.email NOT LIKE '%@imxauto.com' THEN
+    RAISE EXCEPTION 'Admin accounts must use @imxauto.com email addresses';
   END IF;
   
   RETURN NEW;

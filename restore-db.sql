@@ -86,13 +86,13 @@ DROP POLICY IF EXISTS "Enable all access for all users" ON intake_photos;
 CREATE POLICY "Enable all access for all users" ON intake_photos 
 FOR ALL TO public USING (true) WITH CHECK (true);
 
--- 4d. Admin Policies (Restricted to @imxautogroup.com)
+-- 4d. Admin Policies (Restricted to @imxauto.com)
 -- Note: The above policies are permissive to allow the intake form to work without auth.
 -- If you want to restrict Admin Panel access strictly:
 /*
 CREATE POLICY "Admin only read" ON intake_forms
 FOR SELECT TO authenticated
-USING (auth.jwt() ->> 'email' LIKE '%@imxautogroup.com');
+USING (auth.jwt() ->> 'email' LIKE '%@imxauto.com');
 */
 
 -- 5. STORAGE SETUP

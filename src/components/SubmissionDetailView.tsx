@@ -5,7 +5,8 @@ import { supabase } from '@/lib/supabase';
 import { Button } from '@/components/ui/button';
 import { Badge } from '@/components/ui/badge';
 import { Card, CardContent, CardHeader, CardTitle } from '@/components/ui/card';
-import { ArrowLeft, Download, Phone, Mail, Calendar, Car, FileText, Camera, User, Trash2 } from 'lucide-react';
+import { ArrowLeft, Download, Phone, Mail, Calendar, Car, FileText, Camera, User, Trash2, Loader2 } from 'lucide-react';
+import JSZip from 'jszip';
 
 interface Submission {
   submission_id: string;
@@ -49,6 +50,7 @@ export default function SubmissionDetailView({ submission, onBack, onDelete }: S
   const [questionnaireAnswers, setQuestionnaireAnswers] = useState<QuestionnaireAnswer[]>([]);
   const [photos, setPhotos] = useState<Photo[]>([]);
   const [isLoading, setIsLoading] = useState(true);
+  const [isDownloadingAll, setIsDownloadingAll] = useState(false);
 
   useEffect(() => {
     loadSubmissionDetails();
@@ -165,6 +167,47 @@ export default function SubmissionDetailView({ submission, onBack, onDelete }: S
     a.download = `submission_${submission.submission_id}.json`;
     a.click();
     window.URL.revokeObjectURL(url);
+  };
+
+  const handleDownloadAllPhotos = async () => {
+    if (photos.length === 0) return;
+
+    setIsDownloadingAll(true);
+    try {
+      const zip = new JSZip();
+      const photoFolder = zip.folder(`submission_${submission.submission_id}_photos`);
+
+      // Download all photos in parallel
+      const photoPromises = photos.map(async (photo) => {
+        try {
+          const response = await fetch(photo.url);
+          const blob = await response.blob();
+          const cleanFileName = photo.file_name || `${photo.photo_type}_${photo.id.substring(0, 8)}.jpg`;
+          photoFolder?.file(cleanFileName, blob);
+        } catch (err) {
+          console.error(`Error downloading photo ${photo.id}:`, err);
+        }
+      });
+
+      await Promise.all(photoPromises);
+
+      // Generate the zip file
+      const content = await zip.generateAsync({ type: 'blob' });
+
+      // Download the zip
+      const link = document.createElement('a');
+      link.href = URL.createObjectURL(content);
+      link.download = `${submission.first_name}_${submission.last_name}_${submission.submission_id}_photos.zip`;
+      document.body.appendChild(link);
+      link.click();
+      document.body.removeChild(link);
+      URL.revokeObjectURL(link.href);
+    } catch (error) {
+      console.error('Error creating zip file:', error);
+      alert('Failed to download all photos. Please try again.');
+    } finally {
+      setIsDownloadingAll(false);
+    }
   };
 
   if (isLoading) {
@@ -357,9 +400,25 @@ export default function SubmissionDetailView({ submission, onBack, onDelete }: S
       {photos.length > 0 && (
         <Card>
           <CardHeader>
-            <CardTitle className="flex items-center">
-              <Camera className="w-5 h-5 mr-2 text-imx-red" />
-              Photo Gallery ({photos.length} photos)
+            <CardTitle className="flex items-center justify-between w-full">
+              <div className="flex items-center">
+                <Camera className="w-5 h-5 mr-2 text-imx-red" />
+                Photo Gallery ({photos.length} photos)
+              </div>
+              <Button
+                onClick={handleDownloadAllPhotos}
+                disabled={isDownloadingAll || photos.length === 0}
+                variant="outline"
+                size="sm"
+                className="text-xs border-imx-red text-imx-red hover:bg-red-50"
+              >
+                {isDownloadingAll ? (
+                  <Loader2 className="w-4 h-4 mr-2 animate-spin" />
+                ) : (
+                  <Download className="w-4 h-4 mr-2" />
+                )}
+                Download All Photos
+              </Button>
             </CardTitle>
           </CardHeader>
           <CardContent>

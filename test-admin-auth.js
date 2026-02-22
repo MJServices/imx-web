@@ -14,11 +14,11 @@ const supabase = createClient(supabaseUrl, supabaseKey);
 async function testAdminAuth() {
   console.log('🔐 Testing Admin Authentication System...');
   console.log('');
-  
+
   try {
     // 1. Test admin functions exist
     console.log('1. Testing admin functions...');
-    
+
     const { data: functions, error: funcError } = await supabase
       .rpc('get_admin_submissions')
       .select();
@@ -38,7 +38,7 @@ async function testAdminAuth() {
 
     // 2. Test dashboard stats view
     console.log('2. Testing dashboard stats...');
-    
+
     const { data: stats, error: statsError } = await supabase
       .from('admin_dashboard_stats')
       .select('*');
@@ -61,7 +61,7 @@ async function testAdminAuth() {
 
     // 3. Test RLS policies for admin access
     console.log('3. Testing admin RLS policies...');
-    
+
     // Try to access all intake forms (should be restricted for non-admin)
     const { data: forms, error: formsError } = await supabase
       .from('intake_forms')
@@ -76,15 +76,15 @@ async function testAdminAuth() {
 
     // 4. Test authentication state
     console.log('4. Testing authentication state...');
-    
+
     const { data: { session }, error: sessionError } = await supabase.auth.getSession();
-    
+
     if (sessionError) {
       console.log('❌ Session check error:', sessionError.message);
     } else if (session) {
       console.log('✅ User authenticated:', session.user.email);
       console.log('   - Role:', session.user.user_metadata?.role || 'Not set');
-      console.log('   - Is IMX email:', session.user.email?.endsWith('@imxautogroup.com') ? 'Yes' : 'No');
+      console.log('   - Is IMX email:', session.user.email?.endsWith('@imxauto.com') ? 'Yes' : 'No');
     } else {
       console.log('ℹ️  No active session (expected for testing)');
     }
@@ -101,16 +101,16 @@ async function testAdminAuth() {
     console.log('');
     console.log('🔗 Next Steps:');
     console.log('1. Run setup-admin-auth.sql in Supabase SQL Editor');
-    console.log('2. Create admin account with @imxautogroup.com email');
+    console.log('2. Create admin account with @imxauto.com email');
     console.log('3. Visit http://localhost:3000/admin to test login');
     console.log('4. Verify admin dashboard functionality');
     console.log('');
     console.log('🔐 Security Features:');
-    console.log('- Email Domain Restriction: ✅ Only @imxautogroup.com');
+    console.log('- Email Domain Restriction: ✅ Only @imxauto.com');
     console.log('- Role-based Access Control: ✅ Admin role required');
     console.log('- RLS Policies: ✅ Admin bypass for all data');
     console.log('- Session Management: ✅ Secure auth state');
-    
+
   } catch (error) {
     console.error('❌ Admin auth test failed:', error.message);
   }

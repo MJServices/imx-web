@@ -30,9 +30,21 @@ export default function AdminPanel() {
   });
   const router = useRouter();
 
-  // Check authentication on page load
+  // Check authentication on page load — restore session from localStorage
   useEffect(() => {
-    // For simple password auth, we start with no user
+    const savedEmail = localStorage.getItem('imx_admin_email');
+    if (savedEmail) {
+      const restoredUser = {
+        id: 'admin-user',
+        email: savedEmail,
+        user_metadata: { role: 'admin' },
+        app_metadata: {},
+        aud: 'authenticated',
+        created_at: new Date().toISOString(),
+        updated_at: new Date().toISOString(),
+      };
+      setUser(restoredUser as User);
+    }
     setIsLoading(false);
   }, []);
 
@@ -91,10 +103,11 @@ export default function AdminPanel() {
     setAuthError("");
 
     try {
-      // Check if email is from IMX Auto Group domain
-      if (!email.endsWith("@imxautogroup.com")) {
+      // Check if email is an authorized admin
+      const authorizedEmails = ['aaron@imxauto.com', 'aureen@imxauto.com'];
+      if (!authorizedEmails.includes(email.trim().toLowerCase())) {
         setAuthError(
-          "Access denied. Only @imxautogroup.com emails are allowed."
+          "Access denied. Only authorized IMX Auto accounts may log in."
         );
         setIsAuthenticating(false);
         return;
@@ -121,8 +134,10 @@ export default function AdminPanel() {
       };
 
       setUser(mockUser as User);
-      setAuthError("");
-      console.log("Admin signed in:", email);
+      setAuthError('');
+      // Persist session so refresh doesn't log out the admin
+      localStorage.setItem('imx_admin_email', email.trim().toLowerCase());
+      console.log('Admin signed in:', email);
     } catch (error) {
       console.error("Sign in error:", error);
       setAuthError("An unexpected error occurred.");
@@ -134,10 +149,12 @@ export default function AdminPanel() {
   const handleSignOut = async () => {
     try {
       setUser(null);
-      setEmail("");
-      setPassword("");
-      setAuthError("");
-      console.log("Admin signed out");
+      setEmail('');
+      setPassword('');
+      setAuthError('');
+      // Clear persisted session
+      localStorage.removeItem('imx_admin_email');
+      console.log('Admin signed out');
     } catch (error) {
       console.error("Sign out error:", error);
     }
@@ -170,7 +187,7 @@ export default function AdminPanel() {
                 Admin Access
               </h1>
               <p className="text-imx-gray-600">
-                Sign in with your IMX Auto Group account
+                Sign in with your IMX Auto account
               </p>
             </div>
 
@@ -188,7 +205,7 @@ export default function AdminPanel() {
                   type="email"
                   value={email}
                   onChange={(e) => setEmail(e.target.value)}
-                  placeholder="admin@imxautogroup.com"
+                  placeholder="aaron@imxauto.com"
                   required
                   disabled={isAuthenticating}
                 />
@@ -215,10 +232,10 @@ export default function AdminPanel() {
                       </span>
                       <span
                         className={`text-xs font-medium ${passwordStrength === "weak"
-                            ? "text-red-600"
-                            : passwordStrength === "medium"
-                              ? "text-yellow-600"
-                              : "text-green-600"
+                          ? "text-red-600"
+                          : passwordStrength === "medium"
+                            ? "text-yellow-600"
+                            : "text-green-600"
                           }`}
                       >
                         {passwordStrength.toUpperCase()}
@@ -229,8 +246,8 @@ export default function AdminPanel() {
                     <div className="text-xs space-y-1">
                       <div
                         className={`flex items-center ${passwordRequirements.length
-                            ? "text-green-600"
-                            : "text-red-600"
+                          ? "text-green-600"
+                          : "text-red-600"
                           }`}
                       >
                         <span className="mr-1">
@@ -240,8 +257,8 @@ export default function AdminPanel() {
                       </div>
                       <div
                         className={`flex items-center ${passwordRequirements.uppercase
-                            ? "text-green-600"
-                            : "text-red-600"
+                          ? "text-green-600"
+                          : "text-red-600"
                           }`}
                       >
                         <span className="mr-1">
@@ -251,8 +268,8 @@ export default function AdminPanel() {
                       </div>
                       <div
                         className={`flex items-center ${passwordRequirements.lowercase
-                            ? "text-green-600"
-                            : "text-red-600"
+                          ? "text-green-600"
+                          : "text-red-600"
                           }`}
                       >
                         <span className="mr-1">
@@ -262,8 +279,8 @@ export default function AdminPanel() {
                       </div>
                       <div
                         className={`flex items-center ${passwordRequirements.numbers
-                            ? "text-green-600"
-                            : "text-red-600"
+                          ? "text-green-600"
+                          : "text-red-600"
                           }`}
                       >
                         <span className="mr-1">
@@ -273,8 +290,8 @@ export default function AdminPanel() {
                       </div>
                       <div
                         className={`flex items-center ${passwordRequirements.special
-                            ? "text-green-600"
-                            : "text-red-600"
+                          ? "text-green-600"
+                          : "text-red-600"
                           }`}
                       >
                         <span className="mr-1">
@@ -284,8 +301,8 @@ export default function AdminPanel() {
                       </div>
                       <div
                         className={`flex items-center ${passwordRequirements.noCommon
-                            ? "text-green-600"
-                            : "text-red-600"
+                          ? "text-green-600"
+                          : "text-red-600"
                           }`}
                       >
                         <span className="mr-1">

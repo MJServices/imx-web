@@ -29,11 +29,6 @@ const vehicleQuestions: Question[] = [
     options: ['Yes', 'No']
   },
   {
-    id: 'q3',
-    question: 'Does the vehicle have any flood damage?',
-    options: ['Yes', 'No']
-  },
-  {
     id: 'q4',
     question: 'Has this vehicle been smoked in?',
     options: ['Yes', 'No']
@@ -54,19 +49,9 @@ const vehicleQuestions: Question[] = [
     options: ['None', 'Yes, 1', 'Yes, 2', 'Yes, 3+']
   },
   {
-    id: 'q8',
-    question: 'Any major rust OR hail damage?',
-    options: ['Yes', 'No']
-  },
-  {
-    id: 'q9',
-    question: 'Any interior items broken or not operable?',
-    options: ['No', 'Yes, 1', 'Yes, 2', 'Yes, 3+']
-  },
-  {
-    id: 'q10',
-    question: 'Are there any rips, stains, or tears in the interior?',
-    options: ['No', 'Yes, 1', 'Yes, 2', 'Yes, 3+']
+    id: 'q_interior_flaws',
+    question: 'Are there any flaws in the interior?',
+    options: ['No', 'Yes, 1', 'Yes, 2+']
   },
   {
     id: 'q11',

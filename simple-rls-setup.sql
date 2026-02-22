@@ -54,16 +54,16 @@ WITH CHECK (bucket_id = 'intake-photos');
 -- ADMIN POLICIES (for future use)
 -- =====================================================
 
--- Admins can access everything (users with @imxautogroup.com emails)
+-- Admins can access everything (users with @imxauto.com emails)
 CREATE POLICY "Admin access to all intake_forms"
 ON intake_forms
 FOR ALL
 TO authenticated
 USING (
-  auth.jwt() ->> 'email' LIKE '%@imxautogroup.com'
+  auth.jwt() ->> 'email' LIKE '%@imxauto.com'
 )
 WITH CHECK (
-  auth.jwt() ->> 'email' LIKE '%@imxautogroup.com'
+  auth.jwt() ->> 'email' LIKE '%@imxauto.com'
 );
 
 CREATE POLICY "Admin access to all questionnaires"
@@ -71,10 +71,10 @@ ON vehicle_questionnaire
 FOR ALL
 TO authenticated
 USING (
-  auth.jwt() ->> 'email' LIKE '%@imxautogroup.com'
+  auth.jwt() ->> 'email' LIKE '%@imxauto.com'
 )
 WITH CHECK (
-  auth.jwt() ->> 'email' LIKE '%@imxautogroup.com'
+  auth.jwt() ->> 'email' LIKE '%@imxauto.com'
 );
 
 CREATE POLICY "Admin access to all photos"
@@ -82,10 +82,10 @@ ON intake_photos
 FOR ALL
 TO authenticated
 USING (
-  auth.jwt() ->> 'email' LIKE '%@imxautogroup.com'
+  auth.jwt() ->> 'email' LIKE '%@imxauto.com'
 )
 WITH CHECK (
-  auth.jwt() ->> 'email' LIKE '%@imxautogroup.com'
+  auth.jwt() ->> 'email' LIKE '%@imxauto.com'
 );
 
 CREATE POLICY "Admin access to all storage"
@@ -93,10 +93,10 @@ ON storage.objects
 FOR ALL
 TO authenticated
 USING (
-  auth.jwt() ->> 'email' LIKE '%@imxautogroup.com'
+  auth.jwt() ->> 'email' LIKE '%@imxauto.com'
 )
 WITH CHECK (
-  auth.jwt() ->> 'email' LIKE '%@imxautogroup.com'
+  auth.jwt() ->> 'email' LIKE '%@imxauto.com'
 );
 
 -- =====================================================
@@ -117,4 +117,4 @@ ON CONFLICT (id) DO UPDATE SET
   file_size_limit = 10485760;
 
 -- Success message
-SELECT 'RLS setup completed! Public users can access their data, admins (@imxautogroup.com) can access everything.' as status;
+SELECT 'RLS setup completed! Public users can access their data, admins (@imxauto.com) can access everything.' as status;

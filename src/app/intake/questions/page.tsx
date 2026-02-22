@@ -21,46 +21,166 @@ export default function IntakeQuestions() {
   const router = useRouter();
   const { submissionId } = useSubmissionId();
 
+  // VIN decode state
+  const [isDecodingVin, setIsDecodingVin] = useState(false);
+  const [vinDecodeStatus, setVinDecodeStatus] = useState<'idle' | 'success' | 'error'>('idle');
+  const [vinDecodedFields, setVinDecodedFields] = useState<{ year?: string; make?: string; model?: string }>({});
+
   const vehicleYears = Array.from({ length: 30 }, (_, i) => (2024 - i).toString());
 
   const vehicleMakes = [
-    'Acura', 'Audi', 'BMW', 'Buick', 'Cadillac', 'Chevrolet', 'Chrysler',
-    'Dodge', 'Ford', 'GMC', 'Honda', 'Hyundai', 'Infiniti', 'Jeep', 'Kia',
-    'Lexus', 'Lincoln', 'Mazda', 'Mercedes-Benz', 'Mitsubishi', 'Nissan',
-    'Ram', 'Subaru', 'Tesla', 'Toyota', 'Volkswagen', 'Volvo'
+    'Acura', 'Alfa Romeo', 'Aston Martin', 'Audi', 'Bentley', 'BMW', 'Buick',
+    'Cadillac', 'Chevrolet', 'Chrysler', 'Dodge', 'Ferrari', 'Ford', 'Genesis',
+    'GMC', 'Honda', 'Hyundai', 'Infiniti', 'Jeep', 'Kia', 'Lamborghini',
+    'Land Rover', 'Lexus', 'Lincoln', 'Lotus', 'Maserati', 'Mazda',
+    'McLaren', 'Mercedes-Benz', 'MINI', 'Mitsubishi', 'Nissan', 'Pontiac',
+    'Porsche', 'Ram', 'Rivian', 'Rolls-Royce', 'Subaru', 'Tesla', 'Toyota',
+    'Volkswagen', 'Volvo'
   ];
 
   const vehicleModels: Record<string, string[]> = {
-    'Toyota': ['Camry', 'Corolla', 'RAV4', 'Highlander', 'Prius', 'Tacoma', 'Tundra', '4Runner', 'Sienna', 'Avalon'],
-    'Honda': ['Civic', 'Accord', 'CR-V', 'Pilot', 'Odyssey', 'Ridgeline', 'HR-V', 'Passport', 'Insight'],
-    'Ford': ['F-150', 'Escape', 'Explorer', 'Mustang', 'Focus', 'Edge', 'Expedition', 'Ranger', 'Bronco'],
-    'Chevrolet': ['Silverado', 'Equinox', 'Malibu', 'Traverse', 'Camaro', 'Tahoe', 'Suburban', 'Colorado', 'Blazer'],
-    'BMW': ['3 Series', '5 Series', 'X3', 'X5', 'X1', '7 Series', 'X7', '4 Series', 'Z4'],
-    'Mercedes-Benz': ['C-Class', 'E-Class', 'GLC', 'GLE', 'A-Class', 'S-Class', 'GLS', 'CLA', 'GLB'],
-    'Audi': ['A4', 'A6', 'Q5', 'Q7', 'A3', 'Q3', 'Q8', 'A8', 'e-tron'],
-    'Nissan': ['Altima', 'Sentra', 'Rogue', 'Pathfinder', 'Frontier', 'Titan', 'Murano', 'Armada', 'Leaf'],
-    'Acura': ['TLX', 'MDX', 'RDX', 'ILX', 'NSX', 'TLX Type S'],
-    'Buick': ['Encore', 'Envision', 'Enclave', 'Regal'],
-    'Cadillac': ['Escalade', 'XT5', 'CT5', 'XT6', 'CT4'],
-    'Chrysler': ['Pacifica', '300', 'Voyager'],
-    'Dodge': ['Charger', 'Challenger', 'Durango', 'Journey'],
-    'GMC': ['Sierra', 'Terrain', 'Acadia', 'Yukon', 'Canyon'],
-    'Hyundai': ['Elantra', 'Sonata', 'Tucson', 'Santa Fe', 'Palisade', 'Kona'],
-    'Infiniti': ['Q50', 'QX60', 'QX80', 'Q60', 'QX50'],
-    'Jeep': ['Wrangler', 'Grand Cherokee', 'Cherokee', 'Compass', 'Renegade', 'Gladiator'],
-    'Kia': ['Forte', 'Optima', 'Sorento', 'Sportage', 'Telluride', 'Soul'],
-    'Lexus': ['ES', 'RX', 'NX', 'GX', 'LX', 'IS', 'LS'],
-    'Lincoln': ['Navigator', 'Aviator', 'Corsair', 'Nautilus'],
-    'Mazda': ['Mazda3', 'Mazda6', 'CX-5', 'CX-9', 'CX-30', 'MX-5 Miata'],
-    'Mitsubishi': ['Outlander', 'Eclipse Cross', 'Mirage', 'Outlander Sport'],
-    'Ram': ['1500', '2500', '3500', 'ProMaster'],
-    'Subaru': ['Outback', 'Forester', 'Impreza', 'Legacy', 'Ascent', 'Crosstrek'],
-    'Tesla': ['Model 3', 'Model Y', 'Model S', 'Model X', 'Cybertruck'],
-    'Volkswagen': ['Jetta', 'Passat', 'Tiguan', 'Atlas', 'Golf', 'ID.4'],
-    'Volvo': ['XC90', 'XC60', 'S60', 'V60', 'XC40', 'S90']
+    'Toyota': ['Camry', 'Corolla', 'RAV4', 'Highlander', 'Prius', 'Prius Prime', 'Tacoma', 'Tundra', '4Runner', 'Sienna', 'Avalon', 'Venza', 'C-HR', 'GR86', 'GR Supra', 'Sequoia', 'Crown', 'bZ4X'],
+    'Honda': ['Civic', 'Civic Type R', 'Accord', 'CR-V', 'Pilot', 'Odyssey', 'Ridgeline', 'HR-V', 'Passport', 'Insight', 'Prologue'],
+    'Ford': ['F-150', 'F-150 Raptor', 'F-150 Lightning', 'Escape', 'Explorer', 'Mustang', 'Mustang Mach-E', 'Mustang Dark Horse', 'Edge', 'Expedition', 'Ranger', 'Bronco', 'Bronco Sport', 'Maverick'],
+    'Chevrolet': ['Silverado', 'Silverado EV', 'Equinox', 'Equinox EV', 'Malibu', 'Traverse', 'Camaro', 'Camaro ZL1', 'Corvette', 'Corvette Z06', 'Corvette E-Ray', 'Corvette ZR1', 'Tahoe', 'Suburban', 'Colorado', 'Blazer', 'Blazer EV', 'Trax', 'TrailBlazer'],
+    'BMW': [
+      '2 Series', '3 Series', '3 Series xDrive', '4 Series', '4 Series Gran Coupe', '5 Series', '7 Series', '8 Series', '8 Series Gran Coupe', '8 Series Coupe', '8 Series Convertible',
+      'X1', 'X2', 'X3', 'X4', 'X5', 'X6', 'X7',
+      'M2', 'M3', 'M3 Competition', 'M4', 'M4 Competition', 'M4 CSL', 'M5', 'M5 Competition', 'M5 CS', 'M8', 'M8 Gran Coupe',
+      'X3 M', 'X4 M', 'X5 M', 'X6 M',
+      'i4', 'i5', 'i7', 'iX', 'iX3',
+      'Z4'
+    ],
+    'Mercedes-Benz': [
+      'A-Class', 'C-Class', 'E-Class', 'S-Class', 'CLA', 'CLS', 'GLB', 'GLC', 'GLE', 'GLS', 'G-Class',
+      'AMG A 35', 'AMG C 43', 'AMG C 63', 'AMG C 63 S E Performance', 'AMG E 53', 'AMG E 63 S', 'AMG GT 43', 'AMG GT 53', 'AMG GT 63',
+      'AMG GLC 43', 'AMG GLC 63', 'AMG GLE 53', 'AMG GLE 63 S', 'AMG GLS 63', 'AMG G 63', 'AMG SL 43', 'AMG SL 55', 'AMG SL 63',
+      'EQB', 'EQE', 'EQS', 'EQS SUV', 'EQE SUV',
+      'SL-Class', 'SLK-Class'
+    ],
+    'Audi': [
+      'A3', 'A3 Sportback', 'A4', 'A4 Allroad', 'A5', 'A5 Sportback', 'A6', 'A6 Allroad', 'A7', 'A8',
+      'S3', 'S4', 'S5', 'S5 Sportback', 'S6', 'S7', 'S8',
+      'RS3', 'RS4', 'RS5', 'RS5 Sportback', 'RS6 Avant', 'RS7', 'RS Q3', 'RS Q8',
+      'Q2', 'Q3', 'Q4 e-tron', 'Q5', 'Q5 Sportback', 'Q7', 'Q8', 'SQ5', 'SQ7', 'SQ8',
+      'e-tron', 'e-tron GT', 'RS e-tron GT',
+      'TT', 'TTS', 'TT RS', 'R8', 'R8 Spyder'
+    ],
+    'Nissan': ['Altima', 'Sentra', 'Rogue', 'Rogue Sport', 'Pathfinder', 'Frontier', 'Titan', 'Murano', 'Armada', 'Leaf', 'Ariya', 'Z', 'GT-R', 'Kicks', 'Maxima'],
+    'Acura': ['TLX', 'TLX Type S', 'MDX', 'MDX Type S', 'RDX', 'RDX A-Spec', 'ILX', 'NSX', 'NSX Type S', 'Integra', 'Integra Type S', 'ZDX'],
+    'Buick': ['Encore', 'Encore GX', 'Envision', 'Envista', 'Enclave'],
+    'Cadillac': ['Escalade', 'Escalade ESV', 'XT4', 'XT5', 'XT6', 'CT4', 'CT4-V', 'CT4-V Blackwing', 'CT5', 'CT5-V', 'CT5-V Blackwing', 'LYRIQ', 'OPTIQ', 'CELESTIQ'],
+    'Chrysler': ['Pacifica', 'Pacifica Hybrid', '300', 'Voyager'],
+    'Dodge': ['Charger', 'Charger Daytona', 'Challenger', 'Challenger SRT Hellcat', 'Challenger SRT Demon', 'Durango', 'Durango SRT Hellcat', 'Journey', 'Viper'],
+    'GMC': ['Sierra', 'Sierra EV', 'Terrain', 'Acadia', 'Yukon', 'Yukon XL', 'Canyon', 'Envoy', 'Hummer EV'],
+    'Hyundai': ['Elantra', 'Elantra N', 'Sonata', 'Tucson', 'Santa Fe', 'Palisade', 'Kona', 'Kona Electric', 'Ioniq 5', 'Ioniq 6', 'Ioniq 5 N', 'NEXO', 'Venue'],
+    'Infiniti': ['Q50', 'Q50 Red Sport', 'Q60', 'Q60 Red Sport', 'QX50', 'QX55', 'QX60', 'QX80'],
+    'Jeep': ['Wrangler', 'Wrangler Rubicon', '4xe Wrangler', 'Grand Cherokee', 'Grand Cherokee L', 'Grand Cherokee 4xe', 'Cherokee', 'Compass', 'Renegade', 'Gladiator', 'Gladiator Mojave'],
+    'Kia': ['Forte', 'Forte GT', 'K5', 'Sportage', 'Sorento', 'Telluride', 'Carnival', 'Soul', 'EV6', 'EV9', 'Stinger', 'Niro'],
+    'Lexus': ['IS', 'IS 350 F Sport', 'IS 500 F Sport Performance', 'ES', 'GS', 'LS', 'RC', 'RC F', 'LC 500', 'LC 500h', 'UX', 'NX', 'RX', 'RX 500h F Sport', 'GX', 'LX', 'RZ'],
+    'Lincoln': ['Navigator', 'Navigator L', 'Aviator', 'Aviator Grand Touring', 'Corsair', 'Nautilus'],
+    'Mazda': ['Mazda3', 'Mazda3 Turbo', 'Mazda6', 'CX-3', 'CX-30', 'CX-5', 'CX-50', 'CX-70', 'CX-90', 'MX-5 Miata', 'MX-5 RF'],
+    'Mitsubishi': ['Outlander', 'Outlander PHEV', 'Outlander Sport', 'Eclipse Cross', 'Mirage', 'Galant'],
+    'Ram': ['1500', '1500 TRX', '2500', '3500', 'ProMaster', 'ProMaster City'],
+    'Subaru': ['Impreza', 'WRX', 'WRX STI', 'Legacy', 'Outback', 'Forester', 'Crosstrek', 'Ascent', 'BRZ', 'Solterra'],
+    'Tesla': ['Model 3', 'Model Y', 'Model S', 'Model S Plaid', 'Model X', 'Model X Plaid', 'Cybertruck', 'Roadster'],
+    'Volkswagen': ['Jetta', 'Jetta GLI', 'Passat', 'Arteon', 'Tiguan', 'Atlas', 'Atlas Cross Sport', 'Golf', 'Golf GTI', 'Golf R', 'ID.4', 'ID Buzz'],
+    'Volvo': ['S60', 'S60 Recharge', 'S90', 'V60', 'V60 Cross Country', 'V90', 'XC40', 'XC40 Recharge', 'XC60', 'XC60 Recharge', 'XC90', 'XC90 Recharge', 'C40 Recharge'],
+    'Porsche': ['911', '911 Carrera', '911 Carrera S', '911 Carrera 4S', '911 Targa', '911 GT3', '911 GT3 RS', '911 Turbo', '911 Turbo S', 'Cayenne', 'Cayenne Coupe', 'Cayenne Turbo GT', 'Macan', 'Macan EV', 'Panamera', 'Panamera Turbo S', '718 Boxster', '718 Cayman', '718 Spyder', 'Taycan', 'Taycan Turbo S'],
+    'Land Rover': ['Discovery', 'Discovery Sport', 'Defender 90', 'Defender 110', 'Defender 130', 'Range Rover', 'Range Rover Sport', 'Range Rover Sport SVR', 'Range Rover Velar', 'Range Rover Evoque'],
+    'Genesis': ['G70', 'G70 Sport', 'G80', 'G80 Sport', 'G80 Electrified', 'G90', 'GV70', 'GV70 Sport', 'GV70 Electrified', 'GV80', 'GV60'],
+    'Alfa Romeo': ['Giulia', 'Giulia Quadrifoglio', 'Stelvio', 'Stelvio Quadrifoglio', 'Tonale', 'GTV', '4C Spider'],
+    'Maserati': ['Ghibli', 'Ghibli Trofeo', 'Quattroporte', 'Quattroporte Trofeo', 'Levante', 'Levante Trofeo', 'Grecale', 'GranTurismo', 'MC20'],
+    'MINI': ['Cooper', 'Cooper S', 'Cooper JCW', 'Countryman', 'Countryman S', 'Countryman JCW', 'Paceman', 'Clubman'],
+    'Pontiac': ['Firebird', 'Trans Am', 'GTO', 'Grand Prix', 'Bonneville', 'G8', 'Solstice'],
+    'Rivian': ['R1T', 'R1S', 'R2', 'R3'],
+    'Rolls-Royce': ['Ghost', 'Ghost Series II', 'Phantom', 'Phantom Extended', 'Wraith', 'Dawn', 'Cullinan', 'Spectre'],
+    'Bentley': ['Continental GT', 'Continental GT Speed', 'Continental GTC', 'Flying Spur', 'Flying Spur Speed', 'Bentayga', 'Bentayga Speed', 'Mulliner'],
+    'Ferrari': ['Roma', 'Roma Spider', 'Portofino M', 'SF90 Stradale', 'SF90 Spider', '296 GTB', '296 GTS', 'F8 Tributo', 'F8 Spider', '812 Superfast', '812 GTS', 'Purosangue', 'LaFerrari'],
+    'Lamborghini': ['Huracan', 'Huracan Evo', 'Huracan STO', 'Huracan Tecnica', 'Urus', 'Urus Performante', 'Revuelto', 'Countach'],
+    'McLaren': ['Artura', 'GT', '570S', '600LT', '720S', '750S', '765LT', 'Senna', 'Elva'],
+    'Aston Martin': ['Vantage', 'Vantage F1 Edition', 'DB11', 'DB12', 'DBS', 'DBS Superleggera', 'DBX', 'DBX707', 'Valkyrie'],
+    'Lotus': ['Emira', 'Evija', 'Eletre'],
   };
 
   const ownershipOptions = ['Leased', 'Financed', 'Paid Off'];
+
+  // ── VIN Decode ──────────────────────────────────────────────────────────────
+  const decodeVin = async (vin: string) => {
+    setIsDecodingVin(true);
+    setVinDecodeStatus('idle');
+    setVinDecodedFields({});
+
+    try {
+      const res = await fetch(
+        `https://vpic.nhtsa.dot.gov/api/vehicles/decodevin/${vin}?format=json`
+      );
+      const json = await res.json();
+
+      // NHTSA returns an array of Results; pull the key fields
+      const results: { Variable: string; Value: string | null }[] = json.Results ?? [];
+      const get = (key: string) =>
+        results.find((r) => r.Variable === key)?.Value?.trim() ?? '';
+
+      const decodedYear = get('Model Year');
+      const decodedMake = get('Make');   // e.g. "HONDA"
+      const decodedModel = get('Model');  // e.g. "Accord"
+
+      // Validate that we actually got real data (NHTSA returns empty/null for bad VINs)
+      if (!decodedYear || !decodedMake || !decodedModel) {
+        setVinDecodeStatus('error');
+        return;
+      }
+
+      // ── Match make (case-insensitive) ────────────────────────────────────────
+      const matchedMake =
+        vehicleMakes.find(
+          (m) => m.toLowerCase() === decodedMake.toLowerCase()
+        ) ??
+        vehicleMakes.find((m) =>
+          m.toLowerCase().includes(decodedMake.toLowerCase()) ||
+          decodedMake.toLowerCase().includes(m.toLowerCase())
+        ) ??
+        decodedMake; // fall back to raw decoded make
+
+      // ── Match model (case-insensitive) inside that make's list ────────────────
+      const modelsForMake = vehicleModels[matchedMake] ?? [];
+      const matchedModel =
+        modelsForMake.find(
+          (m) => m.toLowerCase() === decodedModel.toLowerCase()
+        ) ??
+        modelsForMake.find((m) =>
+          m.toLowerCase().includes(decodedModel.toLowerCase()) ||
+          decodedModel.toLowerCase().includes(m.toLowerCase())
+        ) ??
+        decodedModel; // fall back to raw decoded model
+
+      // ── Match year from our year list ─────────────────────────────────────────
+      const matchedYear = vehicleYears.includes(decodedYear)
+        ? decodedYear
+        : vehicleYears[0]; // nearest year if out of range
+
+      // ── Apply to form ─────────────────────────────────────────────────────────
+      vehicleForm.setValue('vehicleYear', matchedYear);
+      vehicleForm.setValue('make', matchedMake);
+      vehicleForm.setValue('model', matchedModel);
+
+      // Save corrected values to Supabase
+      await saveToSupabase({
+        vehicle_year: matchedYear,
+        make: matchedMake,
+        model: matchedModel,
+      });
+
+      setVinDecodedFields({ year: matchedYear, make: matchedMake, model: matchedModel });
+      setVinDecodeStatus('success');
+    } catch {
+      setVinDecodeStatus('error');
+    } finally {
+      setIsDecodingVin(false);
+    }
+  };
+  // ────────────────────────────────────────────────────────────────────────────
 
   // Personal Info Form
   const personalForm = useForm<PersonalInfoFormData>({
@@ -355,16 +475,25 @@ export default function IntakeQuestions() {
                     name="vehicleYear"
                     render={({ field }) => (
                       <FormItem>
-                        <FormLabel>Vehicle Year *</FormLabel>
+                        <div className="flex items-center gap-2">
+                          <FormLabel>Vehicle Year *</FormLabel>
+                          {vinDecodedFields.year && (
+                            <span className="text-xs font-medium bg-amber-100 text-amber-700 border border-amber-300 rounded px-1.5 py-0.5">
+                              ✓ VIN Corrected
+                            </span>
+                          )}
+                        </div>
                         <Select
                           onValueChange={(value) => {
                             field.onChange(value);
                             handleVehicleInfoChange('vehicleYear', value);
+                            // Clear the VIN-corrected badge if user manually changes
+                            setVinDecodedFields((prev) => ({ ...prev, year: undefined }));
                           }}
                           value={field.value}
                         >
                           <FormControl>
-                            <SelectTrigger>
+                            <SelectTrigger className={vinDecodedFields.year ? 'border-amber-400 ring-1 ring-amber-300' : ''}>
                               <SelectValue placeholder="Select Year" />
                             </SelectTrigger>
                           </FormControl>
@@ -384,16 +513,24 @@ export default function IntakeQuestions() {
                     name="make"
                     render={({ field }) => (
                       <FormItem>
-                        <FormLabel>Make *</FormLabel>
+                        <div className="flex items-center gap-2">
+                          <FormLabel>Make *</FormLabel>
+                          {vinDecodedFields.make && (
+                            <span className="text-xs font-medium bg-amber-100 text-amber-700 border border-amber-300 rounded px-1.5 py-0.5">
+                              ✓ VIN Corrected
+                            </span>
+                          )}
+                        </div>
                         <Select
                           onValueChange={(value) => {
                             field.onChange(value);
                             handleVehicleInfoChange('make', value);
+                            setVinDecodedFields((prev) => ({ ...prev, make: undefined, model: undefined }));
                           }}
                           value={field.value}
                         >
                           <FormControl>
-                            <SelectTrigger>
+                            <SelectTrigger className={vinDecodedFields.make ? 'border-amber-400 ring-1 ring-amber-300' : ''}>
                               <SelectValue placeholder="Select Make" />
                             </SelectTrigger>
                           </FormControl>
@@ -415,24 +552,36 @@ export default function IntakeQuestions() {
                     name="model"
                     render={({ field }) => (
                       <FormItem>
-                        <FormLabel>Model *</FormLabel>
+                        <div className="flex items-center gap-2">
+                          <FormLabel>Model *</FormLabel>
+                          {vinDecodedFields.model && (
+                            <span className="text-xs font-medium bg-amber-100 text-amber-700 border border-amber-300 rounded px-1.5 py-0.5">
+                              ✓ VIN Corrected
+                            </span>
+                          )}
+                        </div>
                         <Select
                           onValueChange={(value) => {
                             field.onChange(value);
                             handleVehicleInfoChange('model', value);
+                            setVinDecodedFields((prev) => ({ ...prev, model: undefined }));
                           }}
                           value={field.value}
                           disabled={!selectedMake}
                         >
                           <FormControl>
-                            <SelectTrigger>
+                            <SelectTrigger className={vinDecodedFields.model ? 'border-amber-400 ring-1 ring-amber-300' : ''}>
                               <SelectValue placeholder={selectedMake ? "Select Model" : "Select Make First"} />
                             </SelectTrigger>
                           </FormControl>
                           <SelectContent>
+                            {/* Always include the VIN-decoded model even if not in our list */}
                             {availableModels.map(model => (
                               <SelectItem key={model} value={model}>{model}</SelectItem>
                             ))}
+                            {field.value && !availableModels.includes(field.value) && (
+                              <SelectItem key={field.value} value={field.value}>{field.value}</SelectItem>
+                            )}
                           </SelectContent>
                         </Select>
                         <FormMessage />
@@ -476,24 +625,58 @@ export default function IntakeQuestions() {
                     name="vinNumber"
                     render={({ field }) => (
                       <FormItem>
-                        <FormLabel>VIN (Vehicle Identification Number) *</FormLabel>
+                        <div className="flex items-center gap-2">
+                          <FormLabel>VIN (Vehicle Identification Number) *</FormLabel>
+                          {isDecodingVin && (
+                            <div className="flex items-center gap-1 text-xs text-imx-red">
+                              <div className="animate-spin rounded-full h-3 w-3 border-b border-imx-red" />
+                              Decoding VIN...
+                            </div>
+                          )}
+                        </div>
                         <FormControl>
                           <Input
                             {...field}
-                            placeholder="Enter 17-character VIN"
+                            placeholder="Enter 17-character VIN — fields will auto-correct"
                             maxLength={17}
+                            className="font-mono tracking-widest uppercase"
                             onChange={(e) => {
-                              // Auto-uppercase and remove invalid chars as they type
                               const val = e.target.value.toUpperCase().replace(/[^A-HJ-NPR-Z0-9]/g, '');
                               field.onChange(val);
-                              // We wait for validation before saving, or debounce in full impl
-                              // For now, we'll try to save but validation prevents bad data
                               if (val.length === 17) {
                                 handleVehicleInfoChange('vinNumber', val);
+                                decodeVin(val);
+                              } else {
+                                // Clear decode status when VIN is edited below 17 chars
+                                setVinDecodeStatus('idle');
+                                setVinDecodedFields({});
                               }
                             }}
                           />
                         </FormControl>
+
+                        {/* VIN decode success / error banner */}
+                        {vinDecodeStatus === 'success' && (
+                          <div className="flex items-center gap-2 mt-1 text-sm text-green-700 bg-green-50 border border-green-200 rounded-md px-3 py-2">
+                            <svg className="w-4 h-4 flex-shrink-0" fill="currentColor" viewBox="0 0 20 20">
+                              <path fillRule="evenodd" d="M10 18a8 8 0 100-16 8 8 0 000 16zm3.707-9.293a1 1 0 00-1.414-1.414L9 10.586 7.707 9.293a1 1 0 00-1.414 1.414l2 2a1 1 0 001.414 0l4-4z" clipRule="evenodd" />
+                            </svg>
+                            <span>
+                              <strong>VIN decoded successfully.</strong> Year, Make &amp; Model have been updated to match your VIN.
+                            </span>
+                          </div>
+                        )}
+                        {vinDecodeStatus === 'error' && (
+                          <div className="flex items-center gap-2 mt-1 text-sm text-red-700 bg-red-50 border border-red-200 rounded-md px-3 py-2">
+                            <svg className="w-4 h-4 flex-shrink-0" fill="currentColor" viewBox="0 0 20 20">
+                              <path fillRule="evenodd" d="M8.257 3.099c.765-1.36 2.722-1.36 3.486 0l5.58 9.92c.75 1.334-.213 2.98-1.742 2.98H4.42c-1.53 0-2.493-1.646-1.743-2.98l5.58-9.92zM11 13a1 1 0 11-2 0 1 1 0 012 0zm-1-8a1 1 0 00-1 1v3a1 1 0 002 0V6a1 1 0 00-1-1z" clipRule="evenodd" />
+                            </svg>
+                            <span>
+                              <strong>VIN could not be decoded.</strong> Please verify the VIN and check your Year, Make &amp; Model selections manually.
+                            </span>
+                          </div>
+                        )}
+
                         <FormMessage />
                       </FormItem>
                     )}
