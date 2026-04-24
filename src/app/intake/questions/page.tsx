@@ -26,7 +26,7 @@ export default function IntakeQuestions() {
   const [vinDecodeStatus, setVinDecodeStatus] = useState<'idle' | 'success' | 'error'>('idle');
   const [vinDecodedFields, setVinDecodedFields] = useState<{ year?: string; make?: string; model?: string }>({});
 
-  const vehicleYears = Array.from({ length: 30 }, (_, i) => (2024 - i).toString());
+  const vehicleYears = Array.from({ length: 35 }, (_, i) => (2027 - i).toString());
 
   const vehicleMakes = [
     'Acura', 'Alfa Romeo', 'Aston Martin', 'Audi', 'Bentley', 'BMW', 'Buick',

@@ -103,6 +103,20 @@ const vehiclePhotoTypes: VehiclePhotoType[] = [
     exampleImage: "/cars pic/Wheels & Tires.jpeg",
     required: true,
   },
+  {
+    id: "back_left_deck",
+    title: "Back Left Deck",
+    description: "View of the back left corner and deck area",
+    exampleImage: "/cars pic/back_left_deck.jpeg",
+    required: true,
+  },
+  {
+    id: "back_right_deck",
+    title: "Back Right Deck",
+    description: "View of the back right corner and deck area",
+    exampleImage: "/cars pic/back_right_deck.jpeg",
+    required: true,
+  },
 ];
 
 export default function IntakePhotos() {
