@@ -55,6 +55,20 @@ const vehiclePhotoTypes: VehiclePhotoType[] = [
     required: true,
   },
   {
+    id: "back_left_deck",
+    title: "Back Left Deck",
+    description: "View of the back left corner and deck area",
+    exampleImage: "/cars pic/back_left_deck.jpeg",
+    required: true,
+  },
+  {
+    id: "back_right_deck",
+    title: "Back Right Deck",
+    description: "View of the back right corner and deck area",
+    exampleImage: "/cars pic/back_right_deck.jpeg",
+    required: true,
+  },
+  {
     id: "interior_front_seats",
     title: "Interior - Front Seats",
     description: "Dashboard, front seats, and steering wheel",
@@ -101,20 +115,6 @@ const vehiclePhotoTypes: VehiclePhotoType[] = [
     title: "Wheels & Tires",
     description: "Close-up of wheels and tire condition",
     exampleImage: "/cars pic/Wheels & Tires.jpeg",
-    required: true,
-  },
-  {
-    id: "back_left_deck",
-    title: "Back Left Deck",
-    description: "View of the back left corner and deck area",
-    exampleImage: "/cars pic/back_left_deck.jpeg",
-    required: true,
-  },
-  {
-    id: "back_right_deck",
-    title: "Back Right Deck",
-    description: "View of the back right corner and deck area",
-    exampleImage: "/cars pic/back_right_deck.jpeg",
     required: true,
   },
 ];
